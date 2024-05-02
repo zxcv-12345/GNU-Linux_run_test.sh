@@ -87,7 +87,9 @@ while true; do
             # 子菜单，用于运维工具
             maintenance_menu="
             1. 自动清理内核
-            2. 查看当前目录下排名前五的大文件
+            2. 查看已安装内核
+            3. 查看当前使用的内核
+            4. 查看当前目录下排名前五的大文件
             0. 返回上级菜单
             "
             echo "$maintenance_menu"
@@ -98,6 +100,14 @@ while true; do
                     sudo apt-get autoremove --purge
                     ;;
                 2)
+                    echo "查看已安装内核"
+                    dpkg --list | grep linux-image 
+                    ;;
+                3)
+                    echo "查看当前使用的内核"
+                    uname -r
+                    ;;    
+                4)
                     echo "查看当前目录下排名前五的大文件"
                     du -a | sort -rn | head -5
                     ;;
