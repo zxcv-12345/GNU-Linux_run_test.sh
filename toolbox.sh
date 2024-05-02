@@ -26,7 +26,8 @@ while true; do
             tool_menu="
             1. 更新apt列表并安装wget、curl
             2. 安装可视化路由追踪工具 -- NextTrace
-            3. 工具3安装
+            3. 安装1panel面板
+            4. 安装宝塔纯净版面板
             0. 返回上级菜单
             "
             echo "$tool_menu"
@@ -58,19 +59,23 @@ while true; do
                             echo "返回上级菜单"
                             ;;
                         *)
-                            echo "无效选项，请重新输入"
+                            echo "$install_NextTrace_menu" "无效选项，请重新输入"
                             ;;
                     esac
                     ;;
                 3)
-                    echo "安装工具3"
-                    # 在这里添加工具3的安装命令
+                    echo "安装1panel面板"
+                    curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh && bash quick_start.sh
+                    ;;
+                4)
+                    echo "安装bt面板"
+                    wget -O install.sh https://raw.githubusercontent.com/DanKE123abc/BTpanel7.7/main/install_6.0_mod.sh && bash install.sh
                     ;;
                 0)
                     echo "返回上级菜单"
                     ;;
                 *)
-                    echo "无效选项，请重新输入"
+                    echo "$tool_menu" "无效选项，请重新输入"
                     ;;
             esac
             ;;
@@ -96,7 +101,7 @@ while true; do
                     echo "返回上级菜单"
                     ;;
                 *)
-                    echo "无效选项，请重新输入"
+                    echo "$maintenance_menu" "无效选项，请重新输入"
                     ;;
             esac
             ;;    
@@ -132,7 +137,7 @@ while true; do
                     echo "返回上级菜单"
                     ;;
                 *)
-                    echo "无效选项，请重新输入"
+                    echo "$test_menu" "无效选项，请重新输入"
                     ;;
             esac
             ;;
@@ -163,7 +168,7 @@ while true; do
                     echo "返回上级菜单"
                     ;;
                 *)
-                    echo "无效选项，请重新输入"
+                    echo "$bypass_menu" "无效选项，请重新输入"
                     ;;
             esac
             ;;
@@ -179,8 +184,7 @@ while true; do
                 echo "无效选项输入次数过多，即将退出脚本！"
                 exit 1
             fi
-            echo "无效选项，请重新输入"
-            echo "$menu"
+            echo "$menu" "无效选项，请重新输入"
             ;;
     esac
 done
