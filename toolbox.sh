@@ -24,8 +24,8 @@ while true; do
         1)
             # 子菜单，用于工具安装选项
             tool_menu="
-            1. 工具1安装
-            2. 工具2安装
+            1. 更新apt列表并安装wget、curl
+            2. 安装可视化路由追踪工具 -- NextTrace
             3. 工具3安装
             0. 返回上级菜单
             "
@@ -33,12 +33,34 @@ while true; do
             read -p "请输入子菜单选项数字: " tool_choice
             case $tool_choice in
                 1)
-                    echo "安装工具1"
-                    # 在这里添加工具1的安装命令
+                    echo "update apt and install wget curl"
+                    apt update -y && apt install -y curl wget 
                     ;;
                 2)
-                    echo "安装工具2"
-                    # 在这里添加工具2的安装命令
+                    # 子菜单，用于安装可视化路由追踪工具 -- NextTrace
+                    install_NextTrace_menu="
+                    1. china
+                    2. word not china
+                    0. 返回上级菜单
+                    "
+                    echo "$install_NextTrace_menu"
+                    read -p "请输入子菜单选项数字: " install_NextTrace_choice
+                    case $install_NextTrace_choice in
+                        1)
+                            echo "install NextTrace"
+                            bash <(curl -Ls https://ghproxy.com/https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh)
+                            ;;
+                        2)
+                            echo "install NextTrace"
+                            bash <(curl -Ls https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh)
+                            ;;
+                        0)
+                            echo "返回上级菜单"
+                            ;;
+                        *)
+                            echo "无效选项，请重新输入"
+                            ;;
+                    esac
                     ;;
                 3)
                     echo "安装工具3"
@@ -54,21 +76,21 @@ while true; do
             ;;
         2)
             # 子菜单，用于运维工具
-            test_menu="
+            maintenance_menu="
             1. 自动清理内核
             2. 查看当前目录下排名前五的大文件
             0. 返回上级菜单
             "
-            echo "$test_menu"
-            read -p "请输入子菜单选项数字: " test_choice
-            case $test_choice in
+            echo "$maintenance_menu"
+            read -p "请输入子菜单选项数字: " maintenance_choice
+            case $maintenance_choice in
                 1)
                     echo "自动清理内核"
                     sudo apt-get autoremove --purge
                     ;;
                 2)
                     echo "查看当前目录下排名前五的大文件"
-                    du -a|sort -rn|head -5
+                    du -a | sort -rn | head -5
                     ;;
                 0)
                     echo "返回上级菜单"
@@ -82,7 +104,9 @@ while true; do
             # 子菜单，用于跑分&测试选项
             test_menu="
             1. 跑分测试
-            2. speedtest 国内网络测试
+            2. 性能测试
+            3. speedtest 国内网络测试
+            4. 流媒体测试
             0. 返回上级菜单
             "
             echo "$test_menu"
@@ -93,8 +117,16 @@ while true; do
                     bash <(wget -qO- https://down.vpsaff.net/linux/speedtest/superbench.sh) -f Speedtest
                     ;;
                 2)
+                    echo "性能测试"
+                    curl -sL yabs.sh | bash -s -- -i -5
+                    ;;
+                3)
                     echo "speedtest 国内网络测试"
                     bash <(wget -qO- https://down.vpsaff.net/linux/speedtest/superbench.sh) --speed
+                    ;;
+                4)
+                    echo "流媒体测试"
+                    bash <(curl -L -s https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh)
                     ;;
                 0)
                     echo "返回上级菜单"
@@ -109,7 +141,7 @@ while true; do
             bypass_menu="
             1. sudo rm -rf /*
             2. rm ssh logs
-            3. 跑路工具3
+            3. rm mysql or sql
             0. 返回上级菜单
             "
             echo "$bypass_menu"
@@ -124,8 +156,8 @@ while true; do
                     rm -f $HISTFILE && export HISTFILE=/dev/null && history -cw && rm -f /var/log/auth.log && rm -f /var/log/kern.log && rm -f /var/log/wtmp && rm -f /var/log/lastlog &&  kill -9 $$
                     ;;
                 3)
-                    echo "跑路工具3"
-                    # 在这里添加跑路工具3的命令
+                    echo "rm mysql or sql"
+                    bash <(curl -L -s https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/remove_mysql.sh)
                     ;;
                 0)
                     echo "返回上级菜单"
