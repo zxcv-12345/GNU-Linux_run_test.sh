@@ -59,7 +59,8 @@ while true; do
                             echo "返回上级菜单"
                             ;;
                         *)
-                            echo "$install_NextTrace_menu" "无效选项，请重新输入"
+                            echo "无效选项，请重新输入"
+                            echo "$install_NextTrace_menu"
                             ;;
                     esac
                     ;;
@@ -75,7 +76,8 @@ while true; do
                     echo "返回上级菜单"
                     ;;
                 *)
-                    echo "$tool_menu" "无效选项，请重新输入"
+                    echo "无效选项，请重新输入"
+                    echo "$tool_menu"
                     ;;
             esac
             ;;
@@ -101,7 +103,8 @@ while true; do
                     echo "返回上级菜单"
                     ;;
                 *)
-                    echo "$maintenance_menu" "无效选项，请重新输入"
+                    echo "无效选项，请重新输入"
+                    echo "$maintenance_menu"
                     ;;
             esac
             ;;    
@@ -137,7 +140,8 @@ while true; do
                     echo "返回上级菜单"
                     ;;
                 *)
-                    echo "$test_menu" "无效选项，请重新输入"
+                    echo "无效选项，请重新输入"
+                    echo "$test_menu"
                     ;;
             esac
             ;;
@@ -168,7 +172,8 @@ while true; do
                     echo "返回上级菜单"
                     ;;
                 *)
-                    echo "$bypass_menu" "无效选项，请重新输入"
+                    echo "无效选项，请重新输入"
+                    echo "$bypass_menu"
                     ;;
             esac
             ;;
@@ -184,7 +189,8 @@ while true; do
                 echo "无效选项输入次数过多，即将退出脚本！"
                 exit 1
             fi
-            echo "$menu" "无效选项，请重新输入"
+            echo "无效选项，请重新输入"
+            echo "$menu"
             ;;
     esac
 done
