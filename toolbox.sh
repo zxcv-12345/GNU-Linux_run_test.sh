@@ -57,7 +57,7 @@ while true; do
                             ;;
                         0)
                             echo "返回上级菜单"
-                            echo "$install_NextTrace_menu"
+                            echo "$tool_menu"
                             ;;
                         *)
                             echo "无效选项，请重新输入"
@@ -75,7 +75,7 @@ while true; do
                     ;;
                 0)
                     echo "返回上级菜单"
-                    echo "$tool_menu"
+                    echo "$menu"
                     ;;
                 *)
                     echo "无效选项，请重新输入"
@@ -141,7 +141,7 @@ while true; do
                     ;;
                 0)
                     echo "返回上级菜单"
-                    echo "$test_menu"
+                    echo "$menu"
                     ;;
                 *)
                     echo "无效选项，请重新输入"
@@ -174,7 +174,7 @@ while true; do
                     ;;
                 0)
                     echo "返回上级菜单"
-                    echo "$bypass_menu"
+                    echo "$menu"
                     ;;
                 *)
                     echo "无效选项，请重新输入"
