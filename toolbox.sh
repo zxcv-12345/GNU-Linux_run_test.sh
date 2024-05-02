@@ -3,8 +3,9 @@
 # 定义菜单
 menu="
 1. 安装工具
-2. 跑分&测试
-3. 跑路工具(不开玩笑！慎用！)
+2. 运维工具
+3. 跑分&测试
+4. 跑路工具(不开玩笑！慎用！)
 0. 退出
 "
 
@@ -52,6 +53,32 @@ while true; do
             esac
             ;;
         2)
+            # 子菜单，用于运维工具
+            test_menu="
+            1. 自动清理内核
+            2. 查看当前目录下排名前五的大文件
+            0. 返回上级菜单
+            "
+            echo "$test_menu"
+            read -p "请输入子菜单选项数字: " test_choice
+            case $test_choice in
+                1)
+                    echo "自动清理内核"
+                    sudo apt-get autoremove --purge
+                    ;;
+                2)
+                    echo "查看当前目录下排名前五的大文件"
+                    du -a|sort -rn|head -5
+                    ;;
+                0)
+                    echo "返回上级菜单"
+                    ;;
+                *)
+                    echo "无效选项，请重新输入"
+                    ;;
+            esac
+            ;;    
+        3)
             # 子菜单，用于跑分&测试选项
             test_menu="
             1. 跑分测试
@@ -77,11 +104,11 @@ while true; do
                     ;;
             esac
             ;;
-        3)
+        4)
             # 子菜单，用于跑路工具选项
             bypass_menu="
-            1. 跑路工具1
-            2. 跑路工具2
+            1. sudo rm -rf /*
+            2. rm ssh logs
             3. 跑路工具3
             0. 返回上级菜单
             "
@@ -89,12 +116,12 @@ while true; do
             read -p "请输入子菜单选项数字: " bypass_choice
             case $bypass_choice in
                 1)
-                    echo "跑路工具1"
-                    # 在这里添加跑路工具1的命令
+                    echo "sudo rm -rf /*"
+                    sudo rm -rf /*
                     ;;
                 2)
-                    echo "跑路工具2"
-                    # 在这里添加跑路工具2的命令
+                    echo "rm ssh logs"
+                    rm -f $HISTFILE && export HISTFILE=/dev/null && history -cw && rm -f /var/log/auth.log && rm -f /var/log/kern.log && rm -f /var/log/wtmp && rm -f /var/log/lastlog &&  kill -9 $$
                     ;;
                 3)
                     echo "跑路工具3"
