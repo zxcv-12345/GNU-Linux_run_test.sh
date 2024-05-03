@@ -2,11 +2,11 @@
 
 # 定义菜单
 menu="
-1. 安装工具
-2. 运维工具
-3. DD系统
+1. 安装工具集
+2. 运维工具集
+3. 一键DD系统集
 4. 跑分&测试
-5. 跑路工具(不开玩笑！慎用！)
+5. 跑路工具集(不开玩笑！慎用！)
 0. 退出
 "
 
@@ -29,6 +29,7 @@ while true; do
             2. 安装可视化路由追踪工具 -- NextTrace
             3. 安装1panel面板
             4. 安装宝塔纯净版面板
+            5. 安装caddy(使用go本地编译并安装)
             0. 返回上级菜单
             "
             echo "$tool_menu"
@@ -74,6 +75,9 @@ while true; do
                     echo "安装bt面板"
                     wget -O install.sh https://raw.githubusercontent.com/DanKE123abc/BTpanel7.7/main/install_6.0_mod.sh && bash install.sh
                     ;;
+                5)
+                    echo "安装caddy"
+                    bash <(wget -qO- https://raw.githubusercontent.com/AsenHu/Note/blob/main/archive/CaddyCDN.sh)
                 0)
                     echo "返回上级菜单"
                     echo "$menu"
@@ -91,6 +95,7 @@ while true; do
             2. 查看已安装内核
             3. 查看当前使用的内核
             4. 查看当前目录下排名前五的大文件
+            5. 系统开局初始化
             0. 返回上级菜单
             "
             echo "$maintenance_menu"
@@ -112,6 +117,10 @@ while true; do
                     echo "查看当前目录下排名前五的大文件"
                     du -a | sort -rn | head -5
                     ;;
+                5)
+                    echo "系统开局初始化: 可以方便的设置密钥，端口，防火墙，换内核，开 bbr3 这些操作，通常搭配 '一键网络DD为Debian' 使用.建议阅读代码看看它到底会做什么再用."
+                    bash <(curl https://raw.githubusercontent.com/AsenHu/Note/main/debianBBR3.sh -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
+                    ;;
                 0)
                     echo "返回上级菜单"
                     echo "$menu"
@@ -127,6 +136,10 @@ while true; do
             DD_OS_menu="
             1. 一键网络DD为Debian(需进入VNC界面安装)
             2. 一键DD多系统脚本
+            3. 一键DD多系统脚本CN
+            4. 一键DD基于LXC虚拟化
+            5. 一键DD基于openVZ、LXC虚拟化
+            6. 一键DD基于openVZ、LXC虚拟化(磁盘较小的vps'<1G')
             0. 返回上级菜单
             "
             echo "$DD_OS_menu"
@@ -134,11 +147,27 @@ while true; do
             case $DD_OS_choice in
                 1)
                     echo "一键网络DD为Debian(需进入VNC界面安装)"
-                    
+                    bash <(curl https://raw.githubusercontent.com/AsenHu/Note/main/mini.sh -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
                     ;;
                 2)
                     echo "一键DD多系统脚本"
-                     
+                    curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh
+                    ;;
+                3)
+                    echo "一键DD多系统脚本CN"
+                    curl -O https://mirror.ghproxy.com/https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh
+                    ;;
+                4)
+                    echo "DD基于LXC虚拟化的cloud vps"
+                    bash <(curl 'https://raw.githubusercontent.com/AsenHu/Note/main/LXCuidd.sh' -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
+                    ;;
+                5)
+                    echo "DD基于openVZ&LXC虚拟化的cloud vps"
+                    wget -qO OsMutation.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutation.sh && chmod u+x OsMutation.sh && ./OsMutation.sh
+                    ;;
+                6)
+                    echo "DD硬盘小于1GB且基于openVZ&LXC虚拟化的cloud vps"
+                    wget -qO OsMutation.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutationTight.sh && chmod u+x OsMutation.sh && ./OsMutation.sh
                     ;;
                 0)
                     echo "返回上级菜单"
