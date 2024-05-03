@@ -121,6 +121,34 @@ while true; do
                     echo "$maintenance_menu"
                     ;;
             esac
+            ;;
+         3)
+            # 子菜单，用于一键DD系统工具
+            DD_OS_menu="
+            1. 一键网络DD为Debian(需进入VNC界面安装)
+            2. 一键DD多系统脚本
+            0. 返回上级菜单
+            "
+            echo "$DD_OS_menu"
+            read -p "请输入子菜单选项数字: " maintenance_choice
+            case $DD_OS_choice in
+                1)
+                    echo "一键网络DD为Debian(需进入VNC界面安装)"
+                    
+                    ;;
+                2)
+                    echo "一键DD多系统脚本"
+                     
+                    ;;
+                0)
+                    echo "返回上级菜单"
+                    echo "$menu"
+                    ;;
+                *)
+                    echo "无效选项，请重新输入"
+                    echo "$DD_OS_menu"
+                    ;;
+            esac
             ;;    
         4)
             # 子菜单，用于跑分&测试选项
