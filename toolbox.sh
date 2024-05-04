@@ -143,7 +143,7 @@ while true; do
             0. 返回上级菜单
             "
             echo "$OS_menu"
-            read -p "请输入子菜单选项数字: " maintenance_choice
+            read -p "请输入子菜单选项数字: " OS_choice
             case $OS_choice in
                 1)
                     echo "一键网络DD为Debian(需进入VNC界面安装)"
