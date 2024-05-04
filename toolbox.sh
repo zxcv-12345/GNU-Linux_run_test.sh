@@ -186,6 +186,7 @@ while true; do
             2. 性能测试
             3. speedtest 国内网络测试
             4. 流媒体测试
+            5. VPS融合怪服务器测评脚本
             0. 返回上级菜单
             "
             echo "$test_menu"
@@ -206,6 +207,10 @@ while true; do
                 4)
                     echo "流媒体测试"
                     bash <(curl -L -s https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh)
+                    ;;
+                5)
+                    echo "VPS融合怪服务器测评"
+                    bash <(wget -qO- bash.spiritlhl.net/ecs)
                     ;;
                 0)
                     echo "返回上级菜单"
