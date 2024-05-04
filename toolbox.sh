@@ -133,7 +133,7 @@ while true; do
             ;;
          3)
             # 子菜单，用于一键DD系统工具
-            DD_OS_menu="
+            OS_menu="
             1. 一键网络DD为Debian(需进入VNC界面安装)
             2. 一键DD多系统脚本
             3. 一键DD多系统脚本CN
@@ -142,9 +142,9 @@ while true; do
             6. 一键DD基于openVZ、LXC虚拟化(磁盘较小的vps'<1G')
             0. 返回上级菜单
             "
-            echo "$DD_OS_menu"
+            echo "$OS_menu"
             read -p "请输入子菜单选项数字: " maintenance_choice
-            case $DD_OS_choice in
+            case $OS_choice in
                 1)
                     echo "一键网络DD为Debian(需进入VNC界面安装)"
                     bash <(curl https://raw.githubusercontent.com/AsenHu/Note/main/mini.sh -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
@@ -175,7 +175,7 @@ while true; do
                     ;;
                 *)
                     echo "无效选项，请重新输入"
-                    echo "$DD_OS_menu"
+                    echo "$OS_menu"
                     ;;
             esac
             ;;    
