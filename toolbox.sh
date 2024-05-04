@@ -78,6 +78,7 @@ while true; do
                 5)
                     echo "安装caddy"
                     bash <(wget -qO- https://raw.githubusercontent.com/AsenHu/Note/blob/main/archive/CaddyCDN.sh)
+                    ;;
                 0)
                     echo "返回上级菜单"
                     echo "$menu"
