@@ -14,11 +14,12 @@ menu="
 invalid_choice_count=0
 
 # 显示菜单
-echo "$menu"
+#echo "$menu"
 
 # 循环，直到用户选择退出
 while true; do
     # 提示用户输入选项
+    echo "$menu"
     read -p "请输入选项数字: " choice
 
     case $choice in
