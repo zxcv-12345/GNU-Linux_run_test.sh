@@ -268,8 +268,8 @@ while true; do
                 echo "无效选项输入次数过多，即将退出脚本！"
                 exit 1
             fi
-            echo "无效选项，请重新输入"
             echo "$menu"
+            echo "无效选项，请重新输入"
             ;;
     esac
 done
