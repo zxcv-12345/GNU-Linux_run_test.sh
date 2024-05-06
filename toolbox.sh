@@ -139,7 +139,7 @@ while true; do
             4. 查看当前目录下排名前五的大文件
             5. Debian系统开局初始化
             6. 防火墙放行Cloudfare CDN IP
-            7. 更换软件源
+            7. 更换软件源(中国地区)
             8. 修改DNS
             0. 返回上级菜单
             "
@@ -213,6 +213,14 @@ while true; do
                             echo "$Cloudfare_CDN_IP_menu"
                             ;;
                     esac
+                    ;;
+                7)
+                    echo "更换apt源(中国地区)"
+                    nano /etc/apt/sources.list
+                    ;;
+                8)
+                    echo "换DNS"
+                    nano /etc/resolv.conf
                     ;;
                 0)
                     echo "返回上级菜单"
