@@ -123,7 +123,6 @@ while true; do
                     ;;
                 0)
                     echo "返回上级菜单"
-                    echo "$menu"
                     ;;
                 *)
                     echo "无效选项，请重新输入"
