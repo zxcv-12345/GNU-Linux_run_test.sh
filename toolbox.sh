@@ -98,7 +98,7 @@ while true; do
             remove_menu="
             1. 卸载Nexttrace工具
             "
-            echo "$remove_meno"
+            echo "$remove_menu"
             read -p "请输入菜单编号: " remove_choice
             case $remove_choice in
                 1)
