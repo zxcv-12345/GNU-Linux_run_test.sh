@@ -7,7 +7,7 @@ menu="
 3. 运维工具
 4. 一键DD系统
 5. 跑分&测试
-6. 跑路工具集(不开玩笑！慎用！)
+\e[0;31m6. 跑路工具集(不开玩笑！慎用！)\e[0m
 0. 退出
 "
 
@@ -17,7 +17,7 @@ invalid_choice_count=0
 # 循环头
 while true; do
     # 选项输入
-    echo "$menu"
+    echo -e "$menu"
     read -p "请输入选项编号: " choice
 
     case $choice in
