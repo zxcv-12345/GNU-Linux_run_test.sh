@@ -315,12 +315,12 @@ while true; do
         6)
             # 子菜单，用于跑路工具选项
             bypass_menu="
-            1. sudo rm -rf /*
-            2. rm ssh logs
-            3. rm mysql or sql
+            \e[0;31m1. sudo rm -rf /* \e[0m
+            \e[0;31m2. rm ssh logs\e[0m
+            \e[0;31m3. rm mysql or sql\e[0m
             0. 返回上级菜单
             "
-            echo "$bypass_menu"
+            echo -e "$bypass_menu"
             read -p "请输入子菜单选项数字: " bypass_choice
             case $bypass_choice in
                 1)
@@ -340,7 +340,7 @@ while true; do
                     ;;
                 *)
                     echo "无效选项，请重新输入"
-                    echo "$bypass_menu"
+                    echo -e "$bypass_menu"
                     ;;
             esac
             ;;
