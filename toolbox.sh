@@ -105,6 +105,14 @@ while true; do
                     echo "卸载Nexttrace tool"
                     rm /usr/local/bin/nexttrace
                     ;;
+                0)
+                    echo "返回上级菜单"
+                    echo "$menu"
+                    ;;
+                *)
+                    echo "无效选项，请重新输入"
+                    echo "$remove_menu"
+                    ;;
             esac
             ;;
         3)
