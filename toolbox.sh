@@ -363,7 +363,6 @@ while true; do
                 exit 1
             fi
             echo "无效选项，请重新输入"
-            echo "$menu"
             ;;
     esac
 done
