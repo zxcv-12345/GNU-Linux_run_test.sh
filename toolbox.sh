@@ -3,10 +3,11 @@
 # 主菜单
 menu="
 1. 安装工具
-2. 运维工具
-3. 一键DD系统
-4. 跑分&测试
-5. 跑路工具集(不开玩笑！慎用！)
+2. 卸载工具
+3. 运维工具
+4. 一键DD系统
+5. 跑分&测试
+6. 跑路工具集(不开玩笑！慎用！)
 0. 退出
 "
 
@@ -93,6 +94,20 @@ while true; do
             esac
             ;;
         2)
+            # 子菜单,用于卸载工具
+            remove_menu="
+            1. 卸载Nexttrace工具
+            "
+            echo "$remove_meno"
+            read -p "请输入菜单编号: " remove_choice
+            case $remove_choice in
+                1)
+                    echo "卸载Nexttrace tool"
+                    rm /usr/local/bin/nexttrace
+                    ;;
+            esac
+            ;;
+        3)
             # 子菜单，用于运维工具
             maintenance_menu="
             1. 自动清理内核
@@ -135,7 +150,7 @@ while true; do
                     ;;
             esac
             ;;
-         3)
+         4)
             # 子菜单，用于一键DD系统工具
             OS_menu="
             1. 一键网络DD为Debian(需进入VNC界面安装)
@@ -183,7 +198,7 @@ while true; do
                     ;;
             esac
             ;;    
-        4)
+        5)
             # 子菜单，用于跑分&测试选项
             test_menu="
             1. 跑分测试
@@ -226,7 +241,7 @@ while true; do
                     ;;
             esac
             ;;
-        5)
+        6)
             # 子菜单，用于跑路工具选项
             bypass_menu="
             1. sudo rm -rf /*
