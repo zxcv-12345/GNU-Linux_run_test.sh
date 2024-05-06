@@ -26,8 +26,8 @@ while true; do
             tool_menu="
             1. 更新软件包列表并安装wget、curl、net-tools
             2. 安装可视化路由追踪工具 -- NextTrace
-            3. 安装1panel面板
-            4. 安装宝塔纯净版面板
+            3. 安装1panel
+            4. 安装宝塔纯净版
             5. 安装caddy(使用go本地编译并安装)
             6. 安装ufw
             0. 返回上级菜单
@@ -97,6 +97,10 @@ while true; do
             # 子菜单,用于卸载工具
             remove_menu="
             1. 卸载Nexttrace工具
+            2. 卸载ufw
+            3. 卸载1panel
+            4. 卸载宝塔纯净版
+            0. 返回上级菜单
             "
             echo "$remove_menu"
             read -p "请输入菜单编号: " remove_choice
@@ -104,6 +108,18 @@ while true; do
                 1)
                     echo "卸载Nexttrace tool"
                     rm /usr/local/bin/nexttrace
+                    ;;
+                2)
+                    echo "卸载ufw"
+                    apt remove ufw -y
+                    ;;
+                3)
+                    echo "卸载1panel"
+                    1pctl uninstall
+                    ;;
+                4)
+                    echo "卸载宝塔纯净版"
+                    wget -O bt-uninstall.sh https://raw.githubusercontent.com/DanKE123abc/BTpanel7.7/main/bt-uninstall.sh && bash bt-uninstall.sh
                     ;;
                 0)
                     echo "返回上级菜单"
