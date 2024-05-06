@@ -1,36 +1,34 @@
 #!/bin/bash
 
-# 定义菜单
+# 主菜单
 menu="
-1. 安装工具集
-2. 运维工具集
-3. 一键DD系统集
+1. 安装工具
+2. 运维工具
+3. 一键DD系统
 4. 跑分&测试
 5. 跑路工具集(不开玩笑！慎用！)
 0. 退出
 "
 
-# 定义无效选项计数器
+# 选项无效计数器
 invalid_choice_count=0
 
-# 显示菜单
-#echo "$menu"
-
-# 循环，直到用户选择退出
+# 循环头
 while true; do
-    # 提示用户输入选项
+    # 选项输入
     echo "$menu"
-    read -p "请输入选项数字: " choice
+    read -p "请输入选项编号: " choice
 
     case $choice in
         1)
             # 子菜单，用于工具安装选项
             tool_menu="
-            1. 更新apt列表并安装wget、curl
+            1. 更新软件包列表并安装wget、curl、net-tools
             2. 安装可视化路由追踪工具 -- NextTrace
             3. 安装1panel面板
             4. 安装宝塔纯净版面板
             5. 安装caddy(使用go本地编译并安装)
+            6. 安装ufw
             0. 返回上级菜单
             "
             echo "$tool_menu"
@@ -38,13 +36,13 @@ while true; do
             case $tool_choice in
                 1)
                     echo "update apt and install wget curl"
-                    apt update -y && apt install -y curl wget 
+                    apt update -y && apt install -y curl wget net-tools
                     ;;
                 2)
                     # 子菜单，用于安装可视化路由追踪工具 -- NextTrace
                     install_NextTrace_menu="
-                    1. china
-                    2. word not china
+                    1. Chinese Mainland(中国大陆地区)
+                    2. World(Not Chinese Mainland)
                     0. 返回上级菜单
                     "
                     echo "$install_NextTrace_menu"
@@ -79,6 +77,10 @@ while true; do
                 5)
                     echo "安装caddy"
                     bash <(wget -qO- https://raw.githubusercontent.com/AsenHu/Note/main/archive/CaddyCDN.sh)
+                    ;;
+                6)
+                    echo "安装ufw"
+                    apt install ufw -y
                     ;;
                 0)
                     echo "返回上级菜单"
