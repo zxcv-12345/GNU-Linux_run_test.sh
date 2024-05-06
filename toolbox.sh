@@ -30,6 +30,7 @@ while true; do
             4. 安装宝塔纯净版
             5. 安装caddy(使用go本地编译并安装)
             6. 安装ufw
+            7. 安装nmtui
             0. 返回上级菜单
             "
             echo "$tool_menu"
@@ -138,7 +139,10 @@ while true; do
             2. 查看已安装内核
             3. 查看当前使用的内核
             4. 查看当前目录下排名前五的大文件
-            5. 系统开局初始化
+            5. Debian系统开局初始化
+            6. 防火墙放行Cloudfare CDN IP
+            7. 更换软件源
+            8. 修改DNS
             0. 返回上级菜单
             "
             echo "$maintenance_menu"
@@ -163,6 +167,54 @@ while true; do
                 5)
                     echo "系统开局初始化: 可以方便的设置密钥，端口，防火墙，换内核，开 bbr3 这些操作，通常搭配 '一键网络DD为Debian' 使用.建议阅读代码看看它到底会做什么再用."
                     bash <(curl https://raw.githubusercontent.com/AsenHu/Note/main/debianBBR3.sh -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
+                    ;;
+                6)
+                    # 子菜单，用于防火墙放行Cloudfare CDN IP
+                    Cloudfare_CDN_IP_menu="
+                    1. 放行Cloudfare CDN IPv4
+                    2. 放行Cloudfare CDN IPv6
+                    0. 返回上级菜单
+                    "
+                    echo "$Cloudfare_CDN_IP_menu"
+                    read -p "请输入子菜单选项数字: " Cloudfare_CDN_IP_choice
+                    case $Cloudfare_CDN_IP_choice in
+                        1)
+                            echo "IPv4"
+                            sudo ufw allow from 173.245.48.0/20 to any port [端口] proto tcp
+                            sudo ufw allow from 103.21.244.0/22 to any port [端口] proto tcp
+                            sudo ufw allow from 103.22.200.0/22 to any port [端口] proto tcp
+                            sudo ufw allow from 103.31.4.0/22 to any port [端口] proto tcp
+                            sudo ufw allow from 141.101.64.0/18 to any port [端口] proto tcp
+                            sudo ufw allow from 108.162.192.0/18 to any port [端口] proto tcp
+                            sudo ufw allow from 190.93.240.0/20 to any port [端口] proto tcp
+                            sudo ufw allow from 188.114.96.0/20 to any port [端口] proto tcp
+                            sudo ufw allow from 197.234.240.0/22 to any port [端口] proto tcp
+                            sudo ufw allow from 198.41.128.0/17 to any port [端口] proto tcp
+                            sudo ufw allow from 162.158.0.0/15 to any port [端口] proto tcp
+                            sudo ufw allow from 104.16.0.0/13 to any port [端口] proto tcp
+                            sudo ufw allow from 104.24.0.0/14 to any port [端口] proto tcp
+                            sudo ufw allow from 172.64.0.0/13 to any port [端口] proto tcp
+                            sudo ufw allow from 131.0.72.0/22 to any port [端口] proto tcp
+                            ;;
+                        2)
+                            echo "IPv6"
+                            sudo ufw allow from 2400:cb00::/32 to any port [端口] proto tcp
+                            sudo ufw allow from 2606:4700::/32 to any port [端口] proto tcp
+                            sudo ufw allow from 2803:f800::/32 to any port [端口] proto tcp
+                            sudo ufw allow from 2405:b500::/32 to any port [端口] proto tcp
+                            sudo ufw allow from 2405:8100::/32 to any port [端口] proto tcp
+                            sudo ufw allow from 2a06:98c0::/29 to any port [端口] proto tcp
+                            sudo ufw allow from 2c0f:f248::/32 to any port [端口] proto tcp
+                            ;;
+                        0)
+                            echo "返回上级菜单"
+                            echo "$remove_menu"
+                            ;;
+                        *)
+                            echo "无效选项，请重新输入"
+                            echo "$Cloudfare_CDN_IP_menu"
+                            ;;
+                    esac
                     ;;
                 0)
                     echo "返回上级菜单"
