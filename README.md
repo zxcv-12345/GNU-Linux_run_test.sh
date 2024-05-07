@@ -17,5 +17,5 @@ bash <(wget -qO- https://mirror.ghproxy.com/https://raw.githubusercontent.com/zx
 vps融合测试脚本 -- 
 
 ## 未来规划
- x支持redhat系(redhat|centos)
+ x支持redhat系(redhat|centos)/n
  支持debian系(debian|ubuntu)
