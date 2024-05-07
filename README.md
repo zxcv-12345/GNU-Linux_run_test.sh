@@ -14,7 +14,7 @@ bash <(wget -qO- https://mirror.ghproxy.com/https://raw.githubusercontent.com/zx
 ```
 
 ## 引用列表
-vps融合测试脚本 -- 
+VPS融合怪服务器测评 -- https://github.com/spiritLHLS/ecs
 
 ## 未来规划
  x支持redhat系(redhat|centos)
