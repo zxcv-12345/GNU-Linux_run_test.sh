@@ -14,6 +14,8 @@ bash <(wget -qO- https://mirror.ghproxy.com/https://raw.githubusercontent.com/zx
 ```
 
 ## 引用列表
+### 运维工具
+[一键换源脚本](https://github.com/SuperManito/LinuxMirrors/main/ChangeMirrors.sh)
 ### 跑分测试
 [流媒体测试](https://github.com/lmc999/RegionRestrictionCheck/main/check.sh)
 
