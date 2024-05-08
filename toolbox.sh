@@ -33,9 +33,14 @@ menu="
 5. 跑分&测试
 \e[0;31m6. 跑路工具集(不开玩笑！慎用！)\e[0m
 0. 退出
+
+P.S.:众多脚本需要用到curl与wget命令
+     跑脚本前最好先在“安装工具”里面
+     先install这两个基础命令！！！
 "
 
 # 根据系统环境选择命令
+# 软件包
 if [ "$OS" == "centos" ]; then
     package_manager_command="yum"
 elif [ "$OS" == "debian" ]; then
