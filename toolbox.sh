@@ -292,6 +292,7 @@ while true; do
                     ;;
                 0)
                     echo "返回上级菜单"
+                    echo -e "$menu"
                     ;;
                 *)
                     echo "无效选项，请重新输入"
@@ -339,6 +340,7 @@ while true; do
                     ;;
                 0)
                     echo "返回上级菜单"
+                    echo -e "$menu"
                     ;;
                 *)
                     echo "无效选项，请重新输入"
@@ -381,6 +383,7 @@ while true; do
                     ;;
                 0)
                     echo "返回上级菜单"
+                    echo -e "$menu"
                     ;;
                 *)
                     echo "无效选项，请重新输入"
@@ -403,8 +406,11 @@ while true; do
                     read -p "确认进入跑路工具集(y/n): " confirm
                     if [ "$confirm" == "y" ]; then
                         ((confirmed_count++))
+                        echo "确认次数: $confirmed_count"
                         if [ $confirmed_count -eq 3 ]; then
                             echo "确认成功！进入跑路工具集..."
+                            sleep 1
+                            clear
                             echo -e "$bypass_menu"
                             while true; do
                                 read -p "请输入子菜单选项数字: " bypass_choice
@@ -423,6 +429,7 @@ while true; do
                                         ;;
                                     0)
                                         echo "返回上级菜单"
+                                        echo -e "$menu"
                                         break
                                         ;;
                                     *)
@@ -430,11 +437,14 @@ while true; do
                                         ;;
                                 esac
                             done
-                        else
-                            confirmed_count=0
+                            break
                         fi
+                    elif [ "$confirm" == "n" ]; then
+                        echo -e "\e[0;31m已退出跑路工具集！\e[0m"
+                        break
                     else
                         confirmed_count=0
+                        echo "输入无效，请输入 'y' 或 'n'"
                     fi
                 done
             else
