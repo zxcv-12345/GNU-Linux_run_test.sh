@@ -259,7 +259,7 @@ while true; do
                     2. World(Not Chinese Mainland)
                     0. 返回上级菜单
                     "
-                    echo "$Cloudfare_CDN_IP_menu"
+                    echo "$package_manager_menu"
                     read -p "请输入对应的编号: " package_manager_choice
                     case $package_manager_choice in
                         1)
