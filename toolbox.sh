@@ -175,7 +175,7 @@ while true; do
             4. 查看当前目录下排名前五的大文件
             5. Debian系统开局初始化
             6. 防火墙放行Cloudfare CDN IP
-            7. 更换软件源(中国地区)
+            7. 更换包管理器源
             8. 修改DNS
             0. 返回上级菜单
             "
@@ -244,7 +244,7 @@ while true; do
                             ;;
                         0)
                             echo "返回上级菜单"
-                            echo "$remove_menu"
+                            echo "$maintenance_menu"
                             ;;
                         *)
                             echo "无效选项，请重新输入"
@@ -253,12 +253,42 @@ while true; do
                     esac
                     ;;
                 7)
-                    echo "更换apt源(中国地区)"
-                    nano /etc/apt/sources.list
+                    # 子菜单，用于apt、yum、apk等包管理器源的一键替换
+                    package_manager_menu="
+                    1. Chinese Mainland(中国大陆地区)
+                    2. World(Not Chinese Mainland)
+                    0. 返回上级菜单
+                    "
+                    echo "$Cloudfare_CDN_IP_menu"
+                    read -p "请输入对应的编号: " package_manager_choice
+                    case $package_manager_choice in
+                        1)
+                            echo "Chinese Mainland"
+                            bash <(curl -sSL https://linuxmirrors.cn/main.sh)
+                            ;;
+                        2)
+                            echo "World(Not Chinese Mainland)"
+                            bash <(curl -sSL https://raw.githubusercontent.com/SuperManito/LinuxMirrors/main/ChangeMirrors.sh) --abroad
+                            ;;
+                        0)
+                            echo "返回上级菜单"
+                            echo "$maintenance_menu"
+                            ;;
+                        *)
+                            echo "无效选项，请重新输入"
+                            echo "$package_manager_menu"
+                            ;;
+                    esac
                     ;;
                 8)
-                    echo "换DNS"
-                    nano /etc/resolv.conf
+                    echo "更换DNS"
+                    read -p "请输入新的DNS服务器地址: " new_dns
+                    sed -i '/^[^#]/s/^/# /' /etc/resolv.conf
+                    last_non_comment_line=$(awk '!/^#/ && NF {line=$0} END{print NR}' /etc/resolv.conf)
+                    sed -i "${last_non_comment_line}a\\
+                    nameserver ${new_dns}
+                    " /etc/resolv.conf
+                    echo "DNS 已修改为 $new_dns"
                     ;;
                 0)
                     echo "返回上级菜单"
