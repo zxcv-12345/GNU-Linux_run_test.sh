@@ -440,7 +440,8 @@ while true; do
             else
                 echo -e "\e[0;31m输入有误，确认为误触跑路工具集！\e[0m"
             fi
-
+            esac
+            ;;
         0)
             # 退出
             echo "退出脚本"
