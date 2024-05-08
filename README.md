@@ -32,6 +32,6 @@ bash <(wget -qO- https://mirror.ghproxy.com/https://raw.githubusercontent.com/zx
 [DD硬盘小于1GB且基于openVZ&LXC虚拟化的cloud vps](https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutationTight.sh)
 
 ## 未来规划
- x支持redhat系(`redhat`|centos)
+ √支持redhat系(~~redhat~~|centos)
  
  √支持debian系(debian|ubuntu)
