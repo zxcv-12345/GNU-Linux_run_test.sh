@@ -429,7 +429,6 @@ while true; do
                                         ;;
                                     0)
                                         echo "返回上级菜单"
-                                        echo -e "$menu"
                                         break
                                         ;;
                                     *)
