@@ -1,5 +1,29 @@
 #!/bin/bash
 
+# 判断系统环境
+if [ -f /etc/os-release ]; then
+    source /etc/os-release
+    if [ "$ID" == "centos" ]; then
+        echo "当前环境为 CentOS"
+        OS="centos"
+    elif [ "$ID" == "debian" ]; then
+        echo "当前环境为 Debian"
+        OS="debian"
+    else
+        echo "Unsupported OS: $ID"
+        exit 1
+    fi
+elif [ -f /etc/redhat-release ]; then
+    echo "当前环境为 CentOS"
+    OS="centos"
+elif [ -f /etc/debian_version ]; then
+    echo "当前环境为 Debian"
+    OS="debian"
+else
+    echo -e \e[0;31m"无法识别当前环境！"\e[0m
+    exit 1
+fi
+
 # 主菜单
 menu="
 1. 安装工具
@@ -10,6 +34,13 @@ menu="
 \e[0;31m6. 跑路工具集(不开玩笑！慎用！)\e[0m
 0. 退出
 "
+
+# 根据系统环境选择命令
+if [ "$OS" == "centos" ]; then
+    package_manager_command="yum"
+elif [ "$OS" == "debian" ]; then
+    package_manager_command="apt"
+fi
 
 # 选项无效计数器
 invalid_choice_count=0
@@ -38,7 +69,7 @@ while true; do
             case $tool_choice in
                 1)
                     echo "update apt and install wget curl"
-                    apt update -y && apt install -y curl wget net-tools
+                    $package_manager_command update -y && $package_manager_command install -y curl wget net-tools
                     ;;
                 2)
                     # 子菜单，用于安装可视化路由追踪工具 -- NextTrace
@@ -82,7 +113,7 @@ while true; do
                     ;;
                 6)
                     echo "安装ufw"
-                    apt install ufw -y
+                    $package_manager_command install ufw -y
                     ;;
                 0)
                     echo "返回上级菜单"
@@ -111,7 +142,7 @@ while true; do
                     ;;
                 2)
                     echo "卸载ufw"
-                    apt remove ufw -y
+                    $package_manager_command remove ufw -y
                     ;;
                 3)
                     echo "卸载1panel"
@@ -148,7 +179,7 @@ while true; do
             case $maintenance_choice in
                 1)
                     echo "自动清理内核"
-                    sudo apt-get autoremove --purge
+                    sudo $package_manager_command autoremove --purge
                     ;;
                 2)
                     echo "查看已安装内核"
