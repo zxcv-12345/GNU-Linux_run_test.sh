@@ -32,6 +32,7 @@ menu="
 4. 一键DD系统
 5. 跑分&测试
 \e[0;31m6. 跑路工具集(不开玩笑！慎用！)\e[0m
+7. 环境一键安装
 0. 退出
 
 P.S.:众多脚本需要用到curl与wget命令
@@ -65,8 +66,9 @@ while true; do
             3. 安装1panel
             4. 安装宝塔纯净版
             5. 安装caddy(使用go本地编译并安装)
-            6. 安装ufw
-            7. 安装nmtui
+            6. 安装ufw--Debian系防火墙
+            7. 安装nmtui--图形化界面管理网卡&配置
+            8. 安装screen--后台虚拟终端
             0. 返回上级菜单
             "
             echo "$tool_menu"
@@ -450,6 +452,9 @@ while true; do
                 echo -e "\e[0;31m输入有误，确认为误触跑路工具集！\e[0m"
             fi
             ;;
+        7)
+            # 子菜单，各种运行环境一键安装
+            # 一键安装go最新版：https://github.com/Jrohy/go-install
         0)
             # 退出
             echo "退出脚本"
