@@ -122,6 +122,10 @@ while true; do
                     echo "安装ufw"
                     $package_manager_command install ufw -y
                     ;;
+                8)
+                    echo "安装screen"
+                    $package_manager_command install screen -y
+                    ;;
                 0)
                     echo "返回上级菜单"
                     ;;
