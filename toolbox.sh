@@ -459,6 +459,7 @@ while true; do
         7)
             # 子菜单，各种运行环境一键安装
             # 一键安装go最新版：https://github.com/Jrohy/go-install
+            ;;
         0)
             # 退出
             echo "退出脚本"
