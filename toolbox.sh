@@ -384,8 +384,33 @@ while true; do
                     bash <(curl -L -s https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh)
                     ;;
                 5)
-                    echo "VPS融合怪服务器测评"
-                    bash <(wget -qO- bash.spiritlhl.net/ecs)
+                    # 子菜单，用于apt、yum、apk等包管理器源的一键替换
+                    vps_paofen_menu="
+                    "VPS融合怪服务器测评"
+                    1. 交互式(需要预先安装curl)
+                    2. 短链(bash使用wget) P.S：无法使用情况下请用交互式！！！
+                    0. 返回上级菜单
+                    "
+                    echo "$vps_paofen_menu"
+                    read -p "请输入对应的编号: " vps_paofen_choice
+                    case $vps_paofen_choice in
+                        1)
+                            echo "交互式"
+                            curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh
+                            ;;
+                        2)
+                            echo "短链"
+                            bash <(wget -qO- bash.spiritlhl.net/ecs)
+                            ;;
+                        0)
+                            echo "返回上级菜单"
+                            echo "$maintenance_menu"
+                            ;;
+                        *)
+                            echo "无效选项，请重新输入"
+                            echo "$vps_paofen_menu"
+                            ;;
+                    esac
                     ;;
                 0)
                     echo "返回上级菜单"
