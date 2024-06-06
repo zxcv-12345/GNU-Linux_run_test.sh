@@ -32,8 +32,11 @@ bash <(wget -qO- https://mirror.ghproxy.com/https://raw.githubusercontent.com/zx
 [DD基于openVZ&LXC虚拟化的cloud vps](https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutation.sh)
 
 [DD硬盘小于1GB且基于openVZ&LXC虚拟化的cloud vps](https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutationTight.sh)
-
+### 一键安装环境
+[一键安装最新golang环境](https://github.com/Jrohy/go-install)
 ## 未来规划
  √支持redhat系(~~redhat~~|centos)
  
  √支持debian系(debian|ubuntu)
+
+ 支持Alpine
