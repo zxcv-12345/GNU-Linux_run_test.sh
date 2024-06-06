@@ -1,59 +1,63 @@
 #!/bin/bash
 
-# 判断系统环境并选择合适的包管理器
-if [ -f /etc/redhat-release ]; then
-    echo "当前环境为 CentOS"
-    OS="centos"
-    package_manager_command="yum"
-    echo "update source and install wget curl"
-    $package_manager_command update -y && $package_manager_command install -y curl wget
-    echo "已完成 wget 和 curl 的安装，继续后续操作..."
-elif [ -f /etc/debian_version ]; then
-    echo "当前环境为 Debian"
-    OS="debian"
-    package_manager_command="apt"
-    echo "update source and install wget curl"
-    $package_manager_command update -y && $package_manager_command install -y curl wget
-    echo "已完成 wget 和 curl 的安装，继续后续操作..."
-elif [ -f /etc/alpine_version ]; then
-    echo "当前环境为 Alpine"
-    OS="alpine"
-    package_manager_command="apk"
-    echo "update source and install wget curl"
-    $package_manager_command update -y && $package_manager_command install -y curl wget
-    echo "已完成 wget 和 curl 的安装，继续后续操作..."
-elif [ -f /etc/arch_version ]; then
-    echo "当前环境为Arch"
-    OS="arch"
-    package_manager_command="pacman"
-    echo "update source and install wget curl"
-    $package_manager_command -Syu && $package_manager_command -S curl wget
-    echo "已完成 wget 和 curl 的安装，继续后续操作..."
-elif [ -f /etc/rocky_version ]; then
-    echo "当前环境为Rocky"
-    OS="rocky"
-    package_manager_command="yum"
-    echo "update source and install wget curl"
-    $package_manager_command -Syu && $package_manager_command -S curl wget
-    echo "已完成 wget 和 curl 的安装，继续后续操作..."
-elif [ -f /etc/kali_version ]; then
-    echo "当前环境为 Kali"
-    OS="kali"
-    package_manager_command="apt"
-    echo "update source and install wget curl"
-    $package_manager_command update -y && $package_manager_command install -y curl wget
-    echo "已完成 wget 和 curl 的安装，继续后续操作..."
-elif [ -f /etc/alma-release ]; then
-    echo "当前环境为 Alma"
-    OS="alma"
-    package_manager_command="yum"
-    echo "update source and install wget curl"
-    $package_manager_command update -y && $package_manager_command install -y curl wget
-    echo "已完成 wget 和 curl 的安装，继续后续操作..."
-else
-    echo -e "\e[0;31m无法识别当前环境！\e[0m"
-    exit 1
-fi
+read -p "是否预先update同步软件源(y/n): " pppk
+if [ "$pppk" == "y" ]; then
+    # 判断系统环境并选择合适的包管理器
+    if [ -f /etc/redhat-release ]; then
+        echo "当前环境为 CentOS"
+        OS="centos"
+        package_manager_command="yum"
+        echo "update source and install wget curl"
+        $package_manager_command update -y && $package_manager_command install -y curl wget
+        echo "已完成 wget 和 curl 的安装，继续后续操作..."
+    elif [ -f /etc/debian_version ]; then
+        echo "当前环境为 Debian"
+        OS="debian"
+        package_manager_command="apt"
+        echo "update source and install wget curl"
+        $package_manager_command update -y && $package_manager_command install -y curl wget
+        echo "已完成 wget 和 curl 的安装，继续后续操作..."
+    elif [ -f /etc/alpine_version ]; then
+        echo "当前环境为 Alpine"
+        OS="alpine"
+        package_manager_command="apk"
+        echo "update source and install wget curl"
+        $package_manager_command update -y && $package_manager_command install -y curl wget
+        echo "已完成 wget 和 curl 的安装，继续后续操作..."
+    elif [ -f /etc/arch_version ]; then
+        echo "当前环境为Arch"
+        OS="arch"
+        package_manager_command="pacman"
+        echo "update source and install wget curl"
+        $package_manager_command -Syu && $package_manager_command -S curl wget
+        echo "已完成 wget 和 curl 的安装，继续后续操作..."
+    elif [ -f /etc/rocky_version ]; then
+        echo "当前环境为Rocky"
+        OS="rocky"
+        package_manager_command="yum"
+        echo "update source and install wget curl"
+        $package_manager_command -Syu && $package_manager_command -S curl wget
+        echo "已完成 wget 和 curl 的安装，继续后续操作..."
+    elif [ -f /etc/kali_version ]; then
+        echo "当前环境为 Kali"
+        OS="kali"
+        package_manager_command="apt"
+        echo "update source and install wget curl"
+        $package_manager_command update -y && $package_manager_command install -y curl wget
+        echo "已完成 wget 和 curl 的安装，继续后续操作..."
+    elif [ -f /etc/alma-release ]; then
+        echo "当前环境为 Alma"
+        OS="alma"
+        package_manager_command="yum"
+        echo "update source and install wget curl"
+        $package_manager_command update -y && $package_manager_command install -y curl wget
+        echo "已完成 wget 和 curl 的安装，继续后续操作..."
+    else
+        echo -e "\e[0;31m无法识别当前环境！\e[0m"
+        exit 1
+    fi
+
+elif [ "$pppk" == "n" ]; then
 
 # This toolbox.sh body.
 # 主菜单
@@ -540,3 +544,7 @@ while true; do
             ;;
     esac
 done
+
+else
+    exit 1
+fi
