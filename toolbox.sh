@@ -3,27 +3,22 @@
 # 判断系统环境并选择合适的包管理器
 if [ -f /etc/os-release ]; then
     source /etc/os-release
-    case "$ID" in
-        centos)
-            echo "当前环境为 CentOS"
-            OS="centos"
-            package_manager_command="yum"
-            ;;
-        debian)
-            echo "当前环境为 Debian"
-            OS="debian"
-            package_manager_command="apt"
-            ;;
-        alpine)
-            echo "当前环境为 Alpine"
-            OS="alpine"
-            package_manager_command="apk"
-            ;;
-        *)
-            echo "Unsupported OS: $ID"
-            exit 1
-            ;;
-    esac
+    if [ "$ID" == "centos" ]; then
+        echo "当前环境为 CentOS"
+        OS="centos"
+        package_manager_command="yum"
+    elif [ "$ID" == "debian" ]; then
+        echo "当前环境为 Debian"
+        OS="debian"
+        package_manager_command="apt"
+    elif [ "$ID" == "alpine" ]; then
+        echo "当前环境为 Alpine"
+        OS="alpine"
+        package_manager_command="apk"
+    else
+        echo "Unsupported OS: $ID"
+        exit 1
+    fi
 elif [ -f /etc/redhat-release ]; then
     echo "当前环境为 CentOS"
     OS="centos"
@@ -44,6 +39,8 @@ fi
 # 更新源并安装 wget 和 curl
 echo "update source and install wget curl"
 $package_manager_command update -y && $package_manager_command install -y curl wget
+
+echo "已完成 wget 和 curl 的安装，继续后续操作..."
 
 # This toolbox.sh body.
 # 主菜单
