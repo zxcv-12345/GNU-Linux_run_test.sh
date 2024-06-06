@@ -1,46 +1,31 @@
 #!/bin/bash
 
 # 判断系统环境并选择合适的包管理器
-if [ -f /etc/os-release ]; then
-    source /etc/os-release
-    if [ "$ID" == "centos" ]; then
-        echo "当前环境为 CentOS"
-        OS="centos"
-        package_manager_command="yum"
-    elif [ "$ID" == "debian" ]; then
-        echo "当前环境为 Debian"
-        OS="debian"
-        package_manager_command="apt"
-    elif [ "$ID" == "alpine" ]; then
-        echo "当前环境为 Alpine"
-        OS="alpine"
-        package_manager_command="apk"
-    else
-        echo "Unsupported OS: $ID"
-        exit 1
-    fi
-elif [ -f /etc/redhat-release ]; then
+if [ -f /etc/redhat-release ]; then
     echo "当前环境为 CentOS"
     OS="centos"
     package_manager_command="yum"
+    echo "update source and install wget curl"
+    $package_manager_command update -y && $package_manager_command install -y curl wget
+    echo "已完成 wget 和 curl 的安装，继续后续操作..."
 elif [ -f /etc/debian_version ]; then
     echo "当前环境为 Debian"
     OS="debian"
     package_manager_command="apt"
+    echo "update source and install wget curl"
+    $package_manager_command update -y && $package_manager_command install -y curl wget
+    echo "已完成 wget 和 curl 的安装，继续后续操作..."
 elif [ -f /etc/alpine_version ]; then
     echo "当前环境为 Alpine"
     OS="alpine"
     package_manager_command="apk"
+    echo "update source and install wget curl"
+    $package_manager_command update -y && $package_manager_command install -y curl wget
+    echo "已完成 wget 和 curl 的安装，继续后续操作..."
 else
     echo -e "\e[0;31m无法识别当前环境！\e[0m"
     exit 1
 fi
-
-# 更新源并安装 wget 和 curl
-echo "update source and install wget curl"
-$package_manager_command update -y && $package_manager_command install -y curl wget
-
-echo "已完成 wget 和 curl 的安装，继续后续操作..."
 
 # This toolbox.sh body.
 # 主菜单
