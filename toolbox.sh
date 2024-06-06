@@ -38,10 +38,6 @@ menu="
 \e[0;31m6. 跑路工具集(不开玩笑！慎用！)\e[0m
 7. 环境一键安装
 0. 退出
-
-P.S.:众多脚本需要用到curl与wget命令
-     跑脚本前最好先在“安装工具”里面
-     先install这两个基础命令！！！
 "
 
 # 选项无效计数器
@@ -479,8 +475,27 @@ while true; do
             ;;
         7)
             # 子菜单，各种运行环境一键安装
-            # 一键安装go最新版：https://github.com/Jrohy/go-install
-            ;;
+            install_NextTrace_menu="
+            1. 一键安装go最新版
+            0. 返回上级菜单
+            "
+            echo "$install_environment_menu"
+            read -p "请输入子菜单选项数字: " install_environment_choice
+            case $install_environment_choice in
+                    1)
+                        echo "一键安装最新版golang"
+                        source <(curl -L https://go-install.netlify.app/install.sh)
+                        ;;
+                    0)
+                        echo "返回上级菜单"
+                        echo "$menu"
+                        ;;
+                    *)
+                        echo "无效选项，请重新输入"
+                        echo "$install_environment_menu"
+                        ;;
+                esac
+                ;;
         0)
             # 退出
             echo "退出脚本"
