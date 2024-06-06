@@ -22,6 +22,14 @@ elif [ -f /etc/alpine_version ]; then
     echo "update source and install wget curl"
     $package_manager_command update -y && $package_manager_command install -y curl wget
     echo "已完成 wget 和 curl 的安装，继续后续操作..."
+elif [ -f /etc/arch_version ]; then
+    echo "当前环境为Arch"
+    OS="arch"
+    package_manager_command="pacman"
+    package_manager_command="apk"
+    echo "update source and install wget curl"
+    $package_manager_command -Syu && $package_manager_command -S curl wget
+    echo "已完成 wget 和 curl 的安装，继续后续操作..."
 else
     echo -e "\e[0;31m无法识别当前环境！\e[0m"
     exit 1
