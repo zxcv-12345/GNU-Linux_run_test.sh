@@ -1,7 +1,6 @@
 #!/bin/bash
 
-read -p "是否预先update同步软件源(y/n): " pppk
-if [ "$pppk" == "y" ]; then
+function task_update_os {
     # 判断系统环境并选择合适的包管理器
     if [ -f /etc/redhat-release ]; then
         echo "当前环境为 CentOS"
@@ -56,11 +55,14 @@ if [ "$pppk" == "y" ]; then
         echo -e "\e[0;31m无法识别当前环境！\e[0m"
         exit 1
     fi
+    
+}
 
-elif [ "$pppk" == "n" ]; then
+function task_toolbox_sh_body {
 
 # This toolbox.sh body.
 # 主菜单
+
 menu="
 1. 安装工具
 2. 卸载工具
@@ -545,6 +547,12 @@ while true; do
     esac
 done
 
-else
-    exit 1
+}
+
+read -p "是否预先update同步软件源(y/n): " pppk
+if [ "$pppk" == "y" ]; then
+    task_update_os
+    task_toolbox_sh_body
+elif [ "$pppk" == "n" ]; then
+    task_toolbox_sh_body
 fi
