@@ -1,51 +1,49 @@
 #!/bin/bash
 
-# 判断系统环境
+# 判断系统环境并选择合适的包管理器
 if [ -f /etc/os-release ]; then
     source /etc/os-release
-    if [ "$ID" == "centos" ]; then
-        echo "当前环境为 CentOS"
-        OS="centos"
-    elif [ "$ID" == "debian" ]; then
-        echo "当前环境为 Debian"
-        OS="debian"
-    elif [ "$ID" == "alpine" ]; then
-        echo "当前环境为 Alpine"
-        OS="Debian"
-    else
-        echo "Unsupported OS: $ID"
-        exit 1
-    fi
-
-        # 根据系统环境选择命令
-        # 软件包
-        if [ "$OS" == "centos" ]; then
+    case "$ID" in
+        centos)
+            echo "当前环境为 CentOS"
+            OS="centos"
             package_manager_command="yum"
-        elif [ "$OS" == "debian" ]; then
+            ;;
+        debian)
+            echo "当前环境为 Debian"
+            OS="debian"
             package_manager_command="apt"
-        elif [ "$OS" == "alpine" ]; then
+            ;;
+        alpine)
+            echo "当前环境为 Alpine"
+            OS="alpine"
             package_manager_command="apk"
-        fi
-
+            ;;
+        *)
+            echo "Unsupported OS: $ID"
+            exit 1
+            ;;
+    esac
 elif [ -f /etc/redhat-release ]; then
     echo "当前环境为 CentOS"
-    echo "update source and install wget curl"
-    $package_manager_command update -y && $package_manager_command install -y curl wget
     OS="centos"
+    package_manager_command="yum"
 elif [ -f /etc/debian_version ]; then
     echo "当前环境为 Debian"
-    echo "update source and install wget curl"
-    $package_manager_command update -y && $package_manager_command install -y curl wget
     OS="debian"
+    package_manager_command="apt"
 elif [ -f /etc/alpine_version ]; then
     echo "当前环境为 Alpine"
-    echo "update source and install wget curl"
-    $package_manager_command update -y && $package_manager_command install -y curl wget
     OS="alpine"
+    package_manager_command="apk"
 else
-    echo -e \e[0;31m"无法识别当前环境！"\e[0m
+    echo -e "\e[0;31m无法识别当前环境！\e[0m"
     exit 1
 fi
+
+# 更新源并安装 wget 和 curl
+echo "update source and install wget curl"
+$package_manager_command update -y && $package_manager_command install -y curl wget
 
 # This toolbox.sh body.
 # 主菜单
