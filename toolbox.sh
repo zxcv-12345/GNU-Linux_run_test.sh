@@ -510,7 +510,8 @@ while true; do
         7)
             # 子菜单，各种运行环境一键安装
             install_NextTrace_menu="
-            1. 一键安装go最新版
+            1. 一键安装go最新版脚本
+            2. 一键安装&卸载python脚本
             0. 返回上级菜单
             "
             echo "$install_environment_menu"
@@ -519,6 +520,10 @@ while true; do
                     1)
                         echo "一键安装最新版golang"
                         source <(curl -L https://go-install.netlify.app/install.sh)
+                        ;;
+                    2)
+                        echo "一键安装卸载python"
+                        bash <(curl -L -s https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/love_python&kill_python.sh)
                         ;;
                     0)
                         echo "返回上级菜单"
