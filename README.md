@@ -39,4 +39,4 @@ bash <(wget -qO- https://mirror.ghproxy.com/https://raw.githubusercontent.com/zx
  
  √支持debian系(debian|ubuntu)
 
- 支持Alpine
+ √支持Alpine
