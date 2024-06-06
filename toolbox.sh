@@ -209,6 +209,7 @@ while true; do
             6. 防火墙放行Cloudfare CDN IP
             7. 一键更换包管理器源
             8. 修改DNS
+            9. 一键修改系journal日志大小并释放磁盘空间
             0. 返回上级菜单
             "
             echo "$maintenance_menu"
@@ -321,6 +322,10 @@ while true; do
                     nameserver ${new_dns}
                     " /etc/resolv.conf
                     echo "DNS 已修改为 $new_dns"
+                    ;;
+                9)
+                    echo "一键修改系统自带的journal日志记录大小释放系统盘空间"
+                    curl -L https://raw.githubusercontent.com/spiritLHLS/one-click-installation-script/main/repair_scripts/resize_journal.sh -o resize_journal.sh && chmod +x resize_journal.sh && bash resize_journal.sh
                     ;;
                 0)
                     echo "返回上级菜单"
