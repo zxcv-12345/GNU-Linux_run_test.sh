@@ -9,21 +9,45 @@ if [ -f /etc/os-release ]; then
     elif [ "$ID" == "debian" ]; then
         echo "当前环境为 Debian"
         OS="debian"
+    elif [ "$ID" == "alpine" ]; then
+        echo "当前环境为 Alpine"
+        OS="Debian"
     else
         echo "Unsupported OS: $ID"
         exit 1
     fi
+
+        # 根据系统环境选择命令
+        # 软件包
+        if [ "$OS" == "centos" ]; then
+            package_manager_command="yum"
+        elif [ "$OS" == "debian" ]; then
+            package_manager_command="apt"
+        elif [ "$OS" == "alpine" ]; then
+            package_manager_command="apk"
+        fi
+
 elif [ -f /etc/redhat-release ]; then
     echo "当前环境为 CentOS"
+    echo "update source and install wget curl"
+    $package_manager_command update -y && $package_manager_command install -y curl wget
     OS="centos"
 elif [ -f /etc/debian_version ]; then
     echo "当前环境为 Debian"
+    echo "update source and install wget curl"
+    $package_manager_command update -y && $package_manager_command install -y curl wget
     OS="debian"
+elif [ -f /etc/alpine_version ]; then
+    echo "当前环境为 Alpine"
+    echo "update source and install wget curl"
+    $package_manager_command update -y && $package_manager_command install -y curl wget
+    OS="alpine"
 else
     echo -e \e[0;31m"无法识别当前环境！"\e[0m
     exit 1
 fi
 
+# This toolbox.sh body.
 # 主菜单
 menu="
 1. 安装工具
@@ -40,14 +64,6 @@ P.S.:众多脚本需要用到curl与wget命令
      先install这两个基础命令！！！
 "
 
-# 根据系统环境选择命令
-# 软件包
-if [ "$OS" == "centos" ]; then
-    package_manager_command="yum"
-elif [ "$OS" == "debian" ]; then
-    package_manager_command="apt"
-fi
-
 # 选项无效计数器
 invalid_choice_count=0
 
@@ -61,7 +77,7 @@ while true; do
         1)
             # 子菜单，用于工具安装选项
             tool_menu="
-            1. 更新软件包列表并安装wget、curl、net-tools
+            1. 更新软件包列表并安装net-tools
             2. 安装可视化路由追踪工具 -- NextTrace
             3. 安装1panel
             4. 安装宝塔纯净版
@@ -75,8 +91,8 @@ while true; do
             read -p "请输入子菜单选项数字: " tool_choice
             case $tool_choice in
                 1)
-                    echo "update apt and install wget curl"
-                    $package_manager_command update -y && $package_manager_command install -y curl wget net-tools
+                    echo "install net-tools"
+                    $package_manager_command install -y net-tools
                     ;;
                 2)
                     # 子菜单，用于安装可视化路由追踪工具 -- NextTrace
