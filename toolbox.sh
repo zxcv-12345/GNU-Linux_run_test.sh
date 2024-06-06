@@ -26,9 +26,29 @@ elif [ -f /etc/arch_version ]; then
     echo "当前环境为Arch"
     OS="arch"
     package_manager_command="pacman"
-    package_manager_command="apk"
     echo "update source and install wget curl"
     $package_manager_command -Syu && $package_manager_command -S curl wget
+    echo "已完成 wget 和 curl 的安装，继续后续操作..."
+elif [ -f /etc/rocky_version ]; then
+    echo "当前环境为Rocky"
+    OS="rocky"
+    package_manager_command="yum"
+    echo "update source and install wget curl"
+    $package_manager_command -Syu && $package_manager_command -S curl wget
+    echo "已完成 wget 和 curl 的安装，继续后续操作..."
+elif [ -f /etc/kali_version ]; then
+    echo "当前环境为 Kali"
+    OS="kali"
+    package_manager_command="apt"
+    echo "update source and install wget curl"
+    $package_manager_command update -y && $package_manager_command install -y curl wget
+    echo "已完成 wget 和 curl 的安装，继续后续操作..."
+elif [ -f /etc/alma-release ]; then
+    echo "当前环境为 Alma"
+    OS="alma"
+    package_manager_command="yum"
+    echo "update source and install wget curl"
+    $package_manager_command update -y && $package_manager_command install -y curl wget
     echo "已完成 wget 和 curl 的安装，继续后续操作..."
 else
     echo -e "\e[0;31m无法识别当前环境！\e[0m"
