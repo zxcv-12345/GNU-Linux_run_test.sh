@@ -229,7 +229,7 @@ while true; do
                     ;;    
                 4)
                     echo "查看当前目录下排名前五的大文件"
-                    du -a | sort -rn | head -5
+                    du -ha | sort -rn | head -5
                     ;;
                 5)
                     echo "系统开局初始化: 可以方便的设置密钥，端口，防火墙，换内核，开 bbr3 这些操作，通常搭配 '一键网络DD为Debian' 使用.建议阅读代码看看它到底会做什么再用."
