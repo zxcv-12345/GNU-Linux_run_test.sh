@@ -211,6 +211,7 @@ while true; do
             8. 修改DNS
             9. 一键修改系journal日志大小并释放磁盘空间
             10. 一键增加&开启swap
+            11. 开启bash为vi模式
             0. 返回上级菜单
             "
             echo "$maintenance_menu"
@@ -331,6 +332,10 @@ while true; do
                 10)
                     echo "开启添加swap内存交换空间"
                     curl -L https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/edit/main/add_swap_debian.sh
+                    ;;
+                11)
+                    echo "终端开启vi模式"
+                    set -o vi
                     ;;
                 0)
                     echo "返回上级菜单"
