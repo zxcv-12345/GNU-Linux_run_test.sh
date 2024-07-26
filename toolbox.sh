@@ -403,6 +403,7 @@ while true; do
             3. speedtest 国内网络测试
             4. 流媒体测试
             5. VPS融合怪服务器测评脚本
+            6. IP检测脚本
             0. 返回上级菜单
             "
             echo "$test_menu"
@@ -450,6 +451,39 @@ while true; do
                         *)
                             echo "无效选项，请重新输入"
                             echo "$vps_paofen_menu"
+                            ;;
+                    esac
+                    ;;
+                6)
+                    vps_paofen_ip_menu="
+                    "一键IP检测脚本"
+                    1. 双栈测试
+                    2. 单IPv4
+                    3. 单IPv6
+                    0. 返回上级菜单
+                    "
+                    echo "$vps_paofen_ip_menu"
+                    read -p "请输入对应的编号: " vps_paofen_choice_ip
+                    case $vps_paofen_choice_ip in
+                        1)
+                            echo "双栈测试"
+                            bash <(curl -Ls IP.Check.Place)
+                            ;;
+                        2)
+                            echo "单IPv4"
+                            bash <(curl -Ls IP.Check.Place) -v4
+                            ;;
+                        3)
+                            echo "单IPv6"
+                            bash <(curl -Ls IP.Check.Place) -v6
+                            ;;
+                        0)
+                            echo "返回上级菜单"
+                            echo "$maintenance_menu"
+                            ;;
+                        *)
+                            echo "无效选项，请重新输入"
+                            echo "$vps_paofen_ip_menu"
                             ;;
                     esac
                     ;;
