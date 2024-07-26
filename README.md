@@ -20,6 +20,8 @@ bash <(wget -qO- https://mirror.ghproxy.com/https://raw.githubusercontent.com/zx
 [流媒体测试](https://github.com/lmc999/RegionRestrictionCheck/main/check.sh)
 
 [VPS融合怪服务器测评](https://github.com/spiritLHLS/ecs)
+
+[IP黑名单干净程度检测](https://github.com/xykt/IPQuality)
 ### 一键DD系统工具
 [一键网络DD为Debian(需进入VNC界面安装)](https://github.com/AsenHu/Note/main/mini.sh)
 
