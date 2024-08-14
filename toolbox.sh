@@ -95,6 +95,7 @@ while true; do
             6. 安装ufw--Debian系防火墙
             7. 安装nmtui--图形化界面管理网卡&配置
             8. 安装screen--后台虚拟终端
+            9. 安装bbr3--新一代拥塞控制算法
             0. 返回上级菜单
             "
             echo "$tool_menu"
@@ -151,6 +152,10 @@ while true; do
                 8)
                     echo "安装screen"
                     $package_manager_command install screen -y
+                    ;;
+                9)
+                    echo "安装bbr3"
+                    bash <(curl -Ls https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/bbr3fordebian.sh)
                     ;;
                 0)
                     echo "返回上级菜单"
@@ -212,6 +217,7 @@ while true; do
             9. 一键修改系journal日志大小并释放磁盘空间
             10. 一键增加&开启swap
             11. 开启bash为vi模式
+            12. 查看bbr类型
             0. 返回上级菜单
             "
             echo "$maintenance_menu"
@@ -336,6 +342,10 @@ while true; do
                 11)
                     echo "终端开启vi模式"
                     set -o vi
+                    ;;
+                12)
+                    echo "查看当前内核是否为bbr3"
+                    nmodinfo tcp_bbr
                     ;;
                 0)
                     echo "返回上级菜单"
