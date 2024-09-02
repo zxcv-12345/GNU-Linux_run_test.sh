@@ -570,7 +570,7 @@ while true; do
             ;;
         7)
             # 子菜单，各种运行环境一键安装
-            install_NextTrace_menu="
+            install_environment_menu="
             1. 一键安装go最新版脚本
             2. 一键安装&卸载python脚本
             0. 返回上级菜单
