@@ -87,15 +87,15 @@ while true; do
         1)
             # 子菜单，用于工具安装选项
             tool_menu="
-            1. 更新软件包列表并安装net-tools
+            1. 安装net-tools -- Linux基础的network tools
             2. 安装可视化路由追踪工具 -- NextTrace
-            3. 安装1panel
-            4. 安装宝塔纯净版
-            5. 安装caddy(使用go本地编译并安装)
-            6. 安装ufw--Debian系防火墙
-            7. 安装nmtui--图形化界面管理网卡&配置
-            8. 安装screen--后台虚拟终端
-            9. 安装bbr3--新一代拥塞控制算法
+            3. 安装1panel -- 新一代基于容器的Linux管理面板
+            4. 安装宝塔纯净版 -- 干净清爽的bt面板杜绝原版bt.cn屎
+            5. 安装caddy -- 使用go本地编译并安装
+            6. 安装ufw -- Debian系防火墙
+            7. 安装nmtui -- 图形化界面管理网卡&配置
+            8. 安装screen -- 后台虚拟终端
+            9. 安装bbr3 -- 新一代拥塞控制算法
             0. 返回上级菜单
             "
             echo "$tool_menu"
@@ -260,44 +260,36 @@ while true; do
                     bash <(curl https://raw.githubusercontent.com/AsenHu/Note/main/debianBBR3.sh -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
                     ;;
                 6)
-                    # 子菜单，用于防火墙放行Cloudfare CDN IP
+                    # 获取Cloudflare的IP地址
+                    response=$(curl -s https://api.cloudflare.com/client/v4/ips)
+
+                    # 提取IPv4和IPv6地址列表
+                    ipv4_cidrs=$(echo $response | jq -r '.result.ipv4_cidrs[]')
+                    ipv6_cidrs=$(echo $response | jq -r '.result.ipv6_cidrs[]')
+
+                    # 子菜单，用于防火墙放行Cloudflare CDN IP
                     Cloudfare_CDN_IP_menu="
-                    1. IPv4 - 放行Cloudfare CDN IPv4
-                    2. IPv6 - 放行Cloudfare CDN IPv6
+                    1. IPv4 - 放行Cloudflare CDN IPv4
+                    2. IPv6 - 放行Cloudflare CDN IPv6
                     0. 返回上级菜单
                     "
                     echo "$Cloudfare_CDN_IP_menu"
                     read -p "请输入IP协议对应的编号: " Cloudfare_CDN_IP_choice
+
                     case $Cloudfare_CDN_IP_choice in
                         1)
                             echo "IPv4"
                             read -p "请输入IPv4端口号: " port
-                            sudo ufw allow from 173.245.48.0/20 to any port $port proto tcp
-                            sudo ufw allow from 103.21.244.0/22 to any port $port proto tcp
-                            sudo ufw allow from 103.22.200.0/22 to any port $port proto tcp
-                            sudo ufw allow from 103.31.4.0/22 to any port $port proto tcp
-                            sudo ufw allow from 141.101.64.0/18 to any port $port proto tcp
-                            sudo ufw allow from 108.162.192.0/18 to any port $port proto tcp
-                            sudo ufw allow from 190.93.240.0/20 to any port $port proto tcp
-                            sudo ufw allow from 188.114.96.0/20 to any port $port proto tcp
-                            sudo ufw allow from 197.234.240.0/22 to any port $port proto tcp
-                            sudo ufw allow from 198.41.128.0/17 to any port $port proto tcp
-                            sudo ufw allow from 162.158.0.0/15 to any port $port proto tcp
-                            sudo ufw allow from 104.16.0.0/13 to any port $port proto tcp
-                            sudo ufw allow from 104.24.0.0/14 to any port $port proto tcp
-                            sudo ufw allow from 172.64.0.0/13 to any port $port proto tcp
-                            sudo ufw allow from 131.0.72.0/22 to any port $port proto tcp
+                            for ip in $ipv4_cidrs; do
+                                sudo ufw allow from $ip to any port $port proto tcp
+                            done
                             ;;
                         2)
                             echo "IPv6"
                             read -p "请输入IPv6端口号: " port
-                            sudo ufw allow from 2400:cb00::/32 to any port $port proto tcp
-                            sudo ufw allow from 2606:4700::/32 to any port $port proto tcp
-                            sudo ufw allow from 2803:f800::/32 to any port $port proto tcp
-                            sudo ufw allow from 2405:b500::/32 to any port $port proto tcp
-                            sudo ufw allow from 2405:8100::/32 to any port $port proto tcp
-                            sudo ufw allow from 2a06:98c0::/29 to any port $port proto tcp
-                            sudo ufw allow from 2c0f:f248::/32 to any port $port proto tcp
+                            for ip in $ipv6_cidrs; do
+                                sudo ufw allow from $ip to any port $port proto tcp
+                            done
                             ;;
                         0)
                             echo "返回上级菜单"
