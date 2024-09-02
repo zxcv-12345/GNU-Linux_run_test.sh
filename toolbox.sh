@@ -227,7 +227,7 @@ while true; do
             3. 查看当前使用的内核
             4. 查看当前目录下排名前五的大文件
             5. Debian系统开局初始化
-            6. 防火墙放行Cloudfare CDN IP
+            6. ufw防火墙放行Cloudfare CDN IP
             7. 一键更换包管理器源
             8. 修改DNS
             9. 一键修改系journal日志大小并释放磁盘空间
