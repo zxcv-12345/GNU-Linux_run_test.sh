@@ -149,6 +149,10 @@ while true; do
                     echo "安装ufw"
                     $package_manager_command install ufw -y
                     ;;
+                7)
+                    echo "安装nmtui"
+                    $package_manager_command install network-manager -y
+                    ;;
                 8)
                     echo "安装screen"
                     $package_manager_command install screen -y
@@ -174,6 +178,8 @@ while true; do
             2. 卸载ufw
             3. 卸载1panel
             4. 卸载宝塔纯净版
+            5. 卸载screen
+            6. 卸载nmtui
             0. 返回上级菜单
             "
             echo "$remove_menu"
@@ -194,6 +200,14 @@ while true; do
                 4)
                     echo "卸载宝塔纯净版"
                     wget -O bt-uninstall.sh https://raw.githubusercontent.com/DanKE123abc/BTpanel7.7/main/bt-uninstall.sh && bash bt-uninstall.sh
+                    ;;
+                5)
+                    echo "卸载screen"
+                    $package_manager_command remove screen -y
+                    ;;
+                6)
+                    echo "卸载nmtui"
+                    $package_manager_command remove network-manager -y
                     ;;
                 0)
                     echo "返回上级菜单"
