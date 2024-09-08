@@ -355,11 +355,11 @@ while true; do
                     case $Swap_choice in
                         1)
                             echo "开启添加swap内存交换空间"
-                            curl -L https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/add_swap_debian.sh
+                            bash <(wget -qO- https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/add_swap_debian.sh)
                             ;;
                         2)
                             echo "修改swap内存交换优先级"
-                            curl -L https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/amend_swap_debian_priority.sh
+                            bash <(wget -qO- https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/amend_swap_debian_priority.sh)
                             ;;
                         0)
                             echo "返回上级菜单"
