@@ -231,7 +231,7 @@ while true; do
             7. 一键更换包管理器源
             8. 修改DNS
             9. 一键修改系journal日志大小并释放磁盘空间
-            10. 一键增加&开启swap
+            10. Swap交换内存增删与优先级修改
             11. 开启bash为vi模式
             12. 查看bbr类型
             0. 返回上级菜单
@@ -344,8 +344,32 @@ while true; do
                     curl -L https://raw.githubusercontent.com/spiritLHLS/one-click-installation-script/main/repair_scripts/resize_journal.sh -o resize_journal.sh && chmod +x resize_journal.sh && bash resize_journal.sh
                     ;;
                 10)
-                    echo "开启添加swap内存交换空间"
-                    curl -L https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/add_swap_debian.sh
+                    # 子菜单，Swap内存交换增删与优先级修改
+                    Swap_menu="
+                    1. 一键增加&开启swap
+                    2. 一键修改swap内存交换优先级
+                    0. 返回上级菜单
+                    "
+                    echo "$Swap_menu"
+                    read -p "请输入对应的编号: " Swap_choice
+                    case $Swap_choice in
+                        1)
+                            echo "开启添加swap内存交换空间"
+                            curl -L https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/add_swap_debian.sh
+                            ;;
+                        2)
+                            echo "修改swap内存交换优先级"
+                            curl -L https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/amend_swap_debian_priority.sh
+                            ;;
+                        0)
+                            echo "返回上级菜单"
+                            echo "$maintenance_menu"
+                            ;;
+                        *)
+                            echo "无效选项，请重新输入"
+                            echo "$package_manager_menu"
+                            ;;
+                    esac
                     ;;
                 11)
                     echo "终端开启vi模式"
