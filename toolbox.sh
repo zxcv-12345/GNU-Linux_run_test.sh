@@ -345,7 +345,7 @@ while true; do
                     ;;
                 10)
                     echo "开启添加swap内存交换空间"
-                    curl -L https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/edit/main/add_swap_debian.sh
+                    curl -L https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/add_swap_debian.sh
                     ;;
                 11)
                     echo "终端开启vi模式"
