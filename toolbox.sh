@@ -442,7 +442,7 @@ while true; do
             test_menu="
             1. 跑分测试
             2. 性能测试
-            3. speedtest 国内网络测试
+            3. 国内网络速度测试
             4. 流媒体测试
             5. VPS融合怪服务器测评脚本
             6. IP检测脚本
@@ -460,8 +460,8 @@ while true; do
                     curl -sL yabs.sh | bash -s -- -i -5
                     ;;
                 3)
-                    echo "speedtest 国内网络测试"
-                    bash <(wget -qO- https://down.vpsaff.net/linux/speedtest/superbench.sh) --speed
+                    echo "国内网络速度测试"
+                    bash <(curl -sL res.yserver.ink/taier.sh)
                     ;;
                 4)
                     echo "流媒体测试"
