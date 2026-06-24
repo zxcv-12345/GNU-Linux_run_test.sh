@@ -948,11 +948,6 @@ MENU
     done
 }
 
-danger_menu() {
-    warn "该菜单原先包含删除系统文件、清理登录日志、删除数据库等破坏性操作。"
-    warn "本兼容性版本不提供这些执行入口。普通软件卸载请使用“卸载工具”菜单。"
-}
-
 environment_menu() {
     local choice
 
@@ -988,10 +983,7 @@ show_main_menu() {
 3. 运维工具
 4. 一键 DD 系统
 5. 跑分&测试
-MENU
-    printf '\033[0;31m6. 危险工具集（破坏性操作已禁用）\033[0m\n'
-    cat <<'MENU'
-7. 环境一键安装
+6. 环境一键安装
 0. 退出
 MENU
 }
@@ -1021,9 +1013,6 @@ main_menu() {
                 test_menu
                 ;;
             6)
-                danger_menu
-                ;;
-            7)
                 environment_menu
                 ;;
             0)
