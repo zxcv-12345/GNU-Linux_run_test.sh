@@ -1,654 +1,1073 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-function task_update_os {
-    # 判断系统环境并选择合适的包管理器
-    if [ -f /etc/redhat-release ]; then
-        echo "当前环境为 CentOS"
-        OS="centos"
-        package_manager_command="yum"
-        echo "update source and install wget curl"
-        $package_manager_command update -y && $package_manager_command install -y curl wget
-        echo "已完成 wget 和 curl 的安装，继续后续操作..."
-    elif [ -f /etc/debian_version ]; then
-        echo "当前环境为 Debian"
-        OS="debian"
-        package_manager_command="apt"
-        echo "update source and install wget curl"
-        $package_manager_command update -y && $package_manager_command install -y curl wget
-        echo "已完成 wget 和 curl 的安装，继续后续操作..."
-    elif [ -f /etc/alpine_version ]; then
-        echo "当前环境为 Alpine"
-        OS="alpine"
-        package_manager_command="apk"
-        echo "update source and install wget curl"
-        $package_manager_command update -y && $package_manager_command install -y curl wget
-        echo "已完成 wget 和 curl 的安装，继续后续操作..."
-    elif [ -f /etc/arch_version ]; then
-        echo "当前环境为Arch"
-        OS="arch"
-        package_manager_command="pacman"
-        echo "update source and install wget curl"
-        $package_manager_command -Syu && $package_manager_command -S curl wget
-        echo "已完成 wget 和 curl 的安装，继续后续操作..."
-    elif [ -f /etc/rocky_version ]; then
-        echo "当前环境为Rocky"
-        OS="rocky"
-        package_manager_command="yum"
-        echo "update source and install wget curl"
-        $package_manager_command -Syu && $package_manager_command -S curl wget
-        echo "已完成 wget 和 curl 的安装，继续后续操作..."
-    elif [ -f /etc/kali_version ]; then
-        echo "当前环境为 Kali"
-        OS="kali"
-        package_manager_command="apt"
-        echo "update source and install wget curl"
-        $package_manager_command update -y && $package_manager_command install -y curl wget
-        echo "已完成 wget 和 curl 的安装，继续后续操作..."
-    elif [ -f /etc/alma-release ]; then
-        echo "当前环境为 Alma"
-        OS="alma"
-        package_manager_command="yum"
-        echo "update source and install wget curl"
-        $package_manager_command update -y && $package_manager_command install -y curl wget
-        echo "已完成 wget 和 curl 的安装，继续后续操作..."
-    else
-        echo -e "\e[0;31m无法识别当前环境！\e[0m"
-        exit 1
-    fi
-    
+set -o pipefail
+
+OS_ID="unknown"
+OS_LIKE=""
+OS_NAME="unknown"
+PACKAGE_MANAGER=""
+
+info() {
+    printf '%s\n' "$*"
 }
 
-function task_toolbox_sh_body {
+warn() {
+    printf '\033[0;33m%s\033[0m\n' "$*"
+}
 
-# This toolbox.sh body.
-# 主菜单
+err() {
+    printf '\033[0;31m%s\033[0m\n' "$*" >&2
+}
 
-menu="
+has_cmd() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+detect_os() {
+    if [ -r /etc/os-release ]; then
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        OS_ID="${ID:-unknown}"
+        OS_LIKE="${ID_LIKE:-}"
+        OS_NAME="${PRETTY_NAME:-$OS_ID}"
+    elif [ -f /etc/debian_version ]; then
+        OS_ID="debian"
+        OS_LIKE="debian"
+        OS_NAME="Debian"
+    elif [ -f /etc/redhat-release ]; then
+        OS_ID="rhel"
+        OS_LIKE="rhel fedora"
+        OS_NAME="$(cat /etc/redhat-release 2>/dev/null || printf 'Red Hat family')"
+    elif [ -f /etc/alpine-release ] || [ -f /etc/alpine_version ]; then
+        OS_ID="alpine"
+        OS_LIKE="alpine"
+        OS_NAME="Alpine Linux"
+    elif [ -f /etc/arch-release ]; then
+        OS_ID="arch"
+        OS_LIKE="arch"
+        OS_NAME="Arch Linux"
+    fi
+
+    OS_ID="${OS_ID,,}"
+    OS_LIKE="${OS_LIKE,,}"
+}
+
+detect_package_manager() {
+    if has_cmd apt-get; then
+        PACKAGE_MANAGER="apt"
+    elif has_cmd dnf; then
+        PACKAGE_MANAGER="dnf"
+    elif has_cmd yum; then
+        PACKAGE_MANAGER="yum"
+    elif has_cmd zypper; then
+        PACKAGE_MANAGER="zypper"
+    elif has_cmd apk; then
+        PACKAGE_MANAGER="apk"
+    elif has_cmd pacman; then
+        PACKAGE_MANAGER="pacman"
+    else
+        PACKAGE_MANAGER=""
+        return 1
+    fi
+}
+
+os_family() {
+    local info_text
+    info_text=" ${OS_ID} ${OS_LIKE} "
+
+    case "$info_text" in
+        *" debian "*|*" ubuntu "*|*" kali "*)
+            printf 'debian'
+            ;;
+        *" rhel "*|*" fedora "*|*" centos "*|*" rocky "*|*" almalinux "*|*" alma "*)
+            printf 'rhel'
+            ;;
+        *" alpine "*)
+            printf 'alpine'
+            ;;
+        *" arch "*)
+            printf 'arch'
+            ;;
+        *" suse "*|*" opensuse "*)
+            printf 'suse'
+            ;;
+        *)
+            printf '%s' "${PACKAGE_MANAGER:-unknown}"
+            ;;
+    esac
+}
+
+run_root() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+    elif has_cmd sudo; then
+        sudo "$@"
+    else
+        err "需要 root 权限，但当前用户不是 root 且未安装 sudo。"
+        return 1
+    fi
+}
+
+ensure_package_manager() {
+    if [ -z "$PACKAGE_MANAGER" ]; then
+        detect_package_manager || true
+    fi
+
+    if [ -z "$PACKAGE_MANAGER" ]; then
+        err "未检测到支持的包管理器：apt-get/dnf/yum/zypper/apk/pacman。"
+        return 1
+    fi
+}
+
+package_update() {
+    ensure_package_manager || return 1
+
+    case "$PACKAGE_MANAGER" in
+        apt)
+            run_root env DEBIAN_FRONTEND=noninteractive apt-get update
+            ;;
+        dnf)
+            run_root dnf -y makecache
+            ;;
+        yum)
+            run_root yum -y makecache
+            ;;
+        zypper)
+            run_root zypper --non-interactive refresh
+            ;;
+        apk)
+            run_root apk update
+            ;;
+        pacman)
+            run_root pacman -Syu --noconfirm
+            ;;
+    esac
+}
+
+package_install() {
+    [ "$#" -gt 0 ] || return 0
+    ensure_package_manager || return 1
+
+    case "$PACKAGE_MANAGER" in
+        apt)
+            run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+            ;;
+        dnf)
+            run_root dnf install -y "$@"
+            ;;
+        yum)
+            run_root yum install -y "$@"
+            ;;
+        zypper)
+            run_root zypper --non-interactive install "$@"
+            ;;
+        apk)
+            run_root apk add --no-cache "$@"
+            ;;
+        pacman)
+            run_root pacman -S --noconfirm --needed "$@"
+            ;;
+    esac
+}
+
+package_remove() {
+    [ "$#" -gt 0 ] || return 0
+    ensure_package_manager || return 1
+
+    case "$PACKAGE_MANAGER" in
+        apt)
+            run_root env DEBIAN_FRONTEND=noninteractive apt-get remove -y "$@"
+            ;;
+        dnf)
+            run_root dnf remove -y "$@"
+            ;;
+        yum)
+            run_root yum remove -y "$@"
+            ;;
+        zypper)
+            run_root zypper --non-interactive remove -u "$@"
+            ;;
+        apk)
+            run_root apk del "$@"
+            ;;
+        pacman)
+            run_root pacman -Rns --noconfirm "$@"
+            ;;
+    esac
+}
+
+package_autoremove() {
+    ensure_package_manager || return 1
+
+    case "$PACKAGE_MANAGER" in
+        apt)
+            run_root env DEBIAN_FRONTEND=noninteractive apt-get autoremove -y --purge
+            ;;
+        dnf)
+            run_root dnf autoremove -y
+            ;;
+        yum)
+            run_root yum autoremove -y
+            ;;
+        pacman)
+            local orphans
+            orphans="$(pacman -Qtdq 2>/dev/null || true)"
+            if [ -n "$orphans" ]; then
+                # pacman prints one package name per line; word splitting is intended here.
+                run_root pacman -Rns --noconfirm $orphans
+            else
+                info "未发现 pacman 孤儿包。"
+            fi
+            ;;
+        zypper|apk)
+            warn "当前包管理器没有安全通用的 autoremove 行为，请使用发行版推荐命令手动清理。"
+            ;;
+    esac
+}
+
+package_for() {
+    local logical_name family
+    logical_name="$1"
+    family="$(os_family)"
+
+    case "$logical_name" in
+        curl|wget|screen|jq|ufw|ca-certificates)
+            printf '%s' "$logical_name"
+            ;;
+        net-tools)
+            if [ "$family" = "suse" ]; then
+                printf 'net-tools-deprecated'
+            else
+                printf 'net-tools'
+            fi
+            ;;
+        network-manager)
+            case "$family" in
+                rhel)
+                    printf 'NetworkManager-tui'
+                    ;;
+                arch|alpine)
+                    printf 'networkmanager'
+                    ;;
+                suse)
+                    printf 'NetworkManager'
+                    ;;
+                *)
+                    printf 'network-manager'
+                    ;;
+            esac
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+install_logical_package() {
+    local packages
+    packages="$(package_for "$1")" || {
+        err "未知的软件包映射：$1"
+        return 1
+    }
+
+    # package_for may return multiple whitespace separated package names.
+    package_install $packages
+}
+
+remove_logical_package() {
+    local packages
+    packages="$(package_for "$1")" || {
+        err "未知的软件包映射：$1"
+        return 1
+    }
+
+    # package_for may return multiple whitespace separated package names.
+    package_remove $packages
+}
+
+install_base_tools() {
+    info "刷新软件源并安装 curl/wget/ca-certificates..."
+    package_update && package_install curl wget ca-certificates
+}
+
+ensure_downloader() {
+    if has_cmd curl || has_cmd wget; then
+        return 0
+    fi
+
+    warn "未检测到 curl 或 wget，尝试安装基础下载工具。"
+    install_base_tools
+}
+
+fetch_to_stdout() {
+    local url
+    url="$1"
+
+    if has_cmd curl; then
+        curl -fsSL --retry 3 --retry-delay 2 "$url"
+    elif has_cmd wget; then
+        wget -qO- "$url"
+    else
+        err "需要 curl 或 wget。"
+        return 127
+    fi
+}
+
+download_file() {
+    local url output
+    url="$1"
+    output="$2"
+
+    if has_cmd curl; then
+        curl -fL --retry 3 --retry-delay 2 "$url" -o "$output"
+    elif has_cmd wget; then
+        wget -O "$output" "$url"
+    else
+        err "需要 curl 或 wget。"
+        return 127
+    fi
+}
+
+run_remote_bash() {
+    local url tmp status
+    url="$1"
+    shift || true
+
+    ensure_downloader || return 1
+    tmp="$(mktemp "${TMPDIR:-/tmp}/toolbox.XXXXXX")" || return 1
+
+    if download_file "$url" "$tmp"; then
+        bash "$tmp" "$@"
+        status=$?
+    else
+        status=$?
+    fi
+
+    rm -f "$tmp"
+    return "$status"
+}
+
+source_remote_bash() {
+    local url tmp status
+    url="$1"
+
+    ensure_downloader || return 1
+    tmp="$(mktemp "${TMPDIR:-/tmp}/toolbox.XXXXXX")" || return 1
+
+    if download_file "$url" "$tmp"; then
+        # shellcheck disable=SC1090
+        . "$tmp"
+        status=$?
+    else
+        status=$?
+    fi
+
+    rm -f "$tmp"
+    return "$status"
+}
+
+download_named_and_run() {
+    local url output
+    url="$1"
+    output="$2"
+
+    ensure_downloader || return 1
+    download_file "$url" "$output" || return 1
+    chmod +x "$output" 2>/dev/null || true
+    bash "$output"
+}
+
+download_named_only() {
+    local url output
+    url="$1"
+    output="$2"
+
+    ensure_downloader || return 1
+    download_file "$url" "$output" && info "已下载：$output"
+}
+
+require_debian_family() {
+    if [ "$(os_family)" != "debian" ]; then
+        warn "此功能只建议在 Debian/Ubuntu/Kali 系发行版使用，当前系统为：$OS_NAME。"
+        return 1
+    fi
+}
+
+require_systemd() {
+    if ! has_cmd journalctl; then
+        warn "未检测到 systemd/journalctl，此功能不适用于当前系统。"
+        return 1
+    fi
+}
+
+valid_port() {
+    case "$1" in
+        ''|*[!0-9]*)
+            return 1
+            ;;
+        *)
+            [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
+            ;;
+    esac
+}
+
+list_installed_kernels() {
+    case "$PACKAGE_MANAGER" in
+        apt)
+            if has_cmd dpkg; then
+                dpkg --list 'linux-image*' 2>/dev/null | awk '/^ii/{print $2 "\t" $3}'
+            else
+                warn "未检测到 dpkg。"
+            fi
+            ;;
+        dnf|yum|zypper)
+            if has_cmd rpm; then
+                rpm -qa 'kernel*' | sort
+            else
+                warn "未检测到 rpm。"
+            fi
+            ;;
+        apk)
+            apk info 2>/dev/null | grep -E '^linux-' || true
+            ;;
+        pacman)
+            pacman -Q 2>/dev/null | awk '/^linux($|-| )/{print $1 "\t" $2}'
+            ;;
+        *)
+            warn "当前系统未配置可识别的内核包查询方式。"
+            ;;
+    esac
+}
+
+show_top_files() {
+    du -ak . 2>/dev/null | sort -rn | head -n 5 | awk '{
+        size=$1
+        $1=""
+        sub(/^ /, "")
+        printf "%.1f MiB\t%s\n", size / 1024, $0
+    }'
+}
+
+change_dns() {
+    local new_dns tmp backup
+
+    read -r -p "请输入新的 DNS 服务器地址: " new_dns
+    if [ -z "$new_dns" ]; then
+        warn "DNS 地址不能为空。"
+        return 1
+    fi
+
+    if [ -L /etc/resolv.conf ]; then
+        warn "/etc/resolv.conf 是符号链接，systemd-resolved 或 NetworkManager 可能会覆盖本次修改。"
+    fi
+
+    tmp="$(mktemp "${TMPDIR:-/tmp}/resolv.XXXXXX")" || return 1
+    backup="/etc/resolv.conf.toolbox.$(date +%Y%m%d%H%M%S).bak"
+
+    if [ -e /etc/resolv.conf ]; then
+        awk -v dns="$new_dns" '
+            /^[[:space:]]*nameserver[[:space:]]/ { next }
+            { print }
+            END { print "nameserver " dns }
+        ' /etc/resolv.conf >"$tmp"
+        run_root cp /etc/resolv.conf "$backup" || {
+            rm -f "$tmp"
+            return 1
+        }
+    else
+        printf 'nameserver %s\n' "$new_dns" >"$tmp"
+    fi
+
+    run_root cp "$tmp" /etc/resolv.conf
+    rm -f "$tmp"
+    info "DNS 已修改为 $new_dns，原文件备份位置：$backup"
+}
+
+allow_cloudflare_ufw() {
+    local response ipv4_cidrs ipv6_cidrs choice port ip
+
+    if ! has_cmd ufw; then
+        warn "未检测到 ufw，请先安装 ufw。"
+        return 1
+    fi
+
+    if ! has_cmd jq; then
+        warn "此功能需要 jq，正在尝试安装。"
+        install_logical_package jq || return 1
+    fi
+
+    ensure_downloader || return 1
+    response="$(fetch_to_stdout "https://api.cloudflare.com/client/v4/ips")" || return 1
+    ipv4_cidrs="$(printf '%s' "$response" | jq -r '.result.ipv4_cidrs[]')"
+    ipv6_cidrs="$(printf '%s' "$response" | jq -r '.result.ipv6_cidrs[]')"
+
+    cat <<'MENU'
+1. IPv4 - 放行 Cloudflare CDN IPv4
+2. IPv6 - 放行 Cloudflare CDN IPv6
+0. 返回上级菜单
+MENU
+    read -r -p "请输入 IP 协议对应的编号: " choice
+
+    case "$choice" in
+        1)
+            read -r -p "请输入 IPv4 端口号: " port
+            valid_port "$port" || {
+                warn "端口号无效。"
+                return 1
+            }
+            for ip in $ipv4_cidrs; do
+                run_root ufw allow from "$ip" to any port "$port" proto tcp
+            done
+            ;;
+        2)
+            read -r -p "请输入 IPv6 端口号: " port
+            valid_port "$port" || {
+                warn "端口号无效。"
+                return 1
+            }
+            for ip in $ipv6_cidrs; do
+                run_root ufw allow from "$ip" to any port "$port" proto tcp
+            done
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            warn "无效选项。"
+            return 1
+            ;;
+    esac
+}
+
+change_mirror_menu() {
+    local choice
+
+    cat <<'MENU'
+1. Chinese Mainland(中国大陆地区)
+2. World(Not Chinese Mainland)
+0. 返回上级菜单
+MENU
+    read -r -p "请输入对应的编号: " choice
+
+    case "$choice" in
+        1)
+            run_remote_bash "https://linuxmirrors.cn/main.sh"
+            ;;
+        2)
+            run_remote_bash "https://raw.githubusercontent.com/SuperManito/LinuxMirrors/main/ChangeMirrors.sh" --abroad
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            warn "无效选项。"
+            ;;
+    esac
+}
+
+swap_menu() {
+    local choice
+
+    cat <<'MENU'
+1. 一键增加/开启 swap
+2. 一键修改 swap 内存交换优先级
+0. 返回上级菜单
+MENU
+    read -r -p "请输入对应的编号: " choice
+
+    case "$choice" in
+        1)
+            require_debian_family && run_remote_bash "https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/add_swap_debian.sh"
+            ;;
+        2)
+            require_debian_family && run_remote_bash "https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/amend_swap_debian_priority.sh"
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            warn "无效选项。"
+            ;;
+    esac
+}
+
+show_bbr_status() {
+    info "当前 TCP 拥塞控制："
+    sysctl net.ipv4.tcp_congestion_control 2>/dev/null || true
+    sysctl net.ipv4.tcp_available_congestion_control 2>/dev/null || true
+
+    if has_cmd modinfo; then
+        modinfo tcp_bbr 2>/dev/null || warn "tcp_bbr 模块信息不可用，可能已内建进内核或当前内核未提供。"
+    else
+        warn "未检测到 modinfo，如需查看模块详情可安装 kmod。"
+    fi
+}
+
+install_nexttrace_menu() {
+    local choice
+
+    cat <<'MENU'
+1. Chinese Mainland(中国大陆地区)
+2. World(Not Chinese Mainland)
+0. 返回上级菜单
+MENU
+    read -r -p "请输入子菜单选项数字: " choice
+
+    case "$choice" in
+        1)
+            run_remote_bash "https://ghproxy.com/https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh"
+            ;;
+        2)
+            run_remote_bash "https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh"
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            warn "无效选项。"
+            ;;
+    esac
+}
+
+install_tools_menu() {
+    local choice
+
+    while true; do
+        cat <<'MENU'
+1. 安装 net-tools
+2. 安装可视化路由追踪工具 NextTrace
+3. 安装 1Panel
+4. 安装宝塔纯净版
+5. 安装 caddy
+6. 安装 ufw
+7. 安装 nmtui/NetworkManager TUI
+8. 安装 screen
+9. 安装 bbr3
+0. 返回上级菜单
+MENU
+        read -r -p "请输入子菜单选项数字: " choice
+
+        case "$choice" in
+            1)
+                install_logical_package net-tools
+                ;;
+            2)
+                install_nexttrace_menu
+                ;;
+            3)
+                run_remote_bash "https://resource.fit2cloud.com/1panel/package/quick_start.sh"
+                ;;
+            4)
+                run_remote_bash "https://raw.githubusercontent.com/DanKE123abc/BTpanel7.7/main/install_6.0_mod.sh"
+                ;;
+            5)
+                run_remote_bash "https://raw.githubusercontent.com/AsenHu/Note/main/archive/CaddyCDN.sh"
+                ;;
+            6)
+                install_logical_package ufw
+                ;;
+            7)
+                install_logical_package network-manager
+                ;;
+            8)
+                install_logical_package screen
+                ;;
+            9)
+                require_debian_family && run_remote_bash "https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/bbr3fordebian.sh"
+                ;;
+            0)
+                return 0
+                ;;
+            *)
+                warn "无效选项，请重新输入。"
+                ;;
+        esac
+    done
+}
+
+remove_tools_menu() {
+    local choice
+
+    while true; do
+        cat <<'MENU'
+1. 卸载 NextTrace 工具
+2. 卸载 ufw
+3. 卸载 1Panel
+4. 卸载宝塔纯净版
+5. 卸载 screen
+6. 卸载 nmtui/NetworkManager TUI
+0. 返回上级菜单
+MENU
+        read -r -p "请输入菜单编号: " choice
+
+        case "$choice" in
+            1)
+                run_root rm -f -- /usr/local/bin/nexttrace
+                ;;
+            2)
+                remove_logical_package ufw
+                ;;
+            3)
+                if has_cmd 1pctl; then
+                    run_root 1pctl uninstall
+                else
+                    warn "未检测到 1pctl。"
+                fi
+                ;;
+            4)
+                run_remote_bash "https://raw.githubusercontent.com/DanKE123abc/BTpanel7.7/main/bt-uninstall.sh"
+                ;;
+            5)
+                remove_logical_package screen
+                ;;
+            6)
+                remove_logical_package network-manager
+                ;;
+            0)
+                return 0
+                ;;
+            *)
+                warn "无效选项，请重新输入。"
+                ;;
+        esac
+    done
+}
+
+maintenance_menu() {
+    local choice
+
+    while true; do
+        cat <<'MENU'
+1. 自动清理无用软件包
+2. 查看已安装内核
+3. 查看当前使用的内核
+4. 查看当前目录下排名前五的大文件
+5. Debian 系统开局初始化
+6. ufw 防火墙放行 Cloudflare CDN IP
+7. 一键更换包管理器源
+8. 修改 DNS
+9. 修改 systemd journal 日志大小并释放磁盘空间
+10. Swap 交换内存增删与优先级修改
+11. 开启当前 bash 会话 vi 模式
+12. 查看 bbr 类型
+0. 返回上级菜单
+MENU
+        read -r -p "请输入子菜单选项数字: " choice
+
+        case "$choice" in
+            1)
+                package_autoremove
+                ;;
+            2)
+                list_installed_kernels
+                ;;
+            3)
+                uname -r
+                ;;
+            4)
+                show_top_files
+                ;;
+            5)
+                require_debian_family && run_remote_bash "https://raw.githubusercontent.com/AsenHu/Note/main/debianBBR3.sh"
+                ;;
+            6)
+                allow_cloudflare_ufw
+                ;;
+            7)
+                change_mirror_menu
+                ;;
+            8)
+                change_dns
+                ;;
+            9)
+                require_systemd && run_remote_bash "https://raw.githubusercontent.com/spiritLHLS/one-click-installation-script/main/repair_scripts/resize_journal.sh"
+                ;;
+            10)
+                swap_menu
+                ;;
+            11)
+                set -o vi
+                info "当前 bash 会话已开启 vi 模式。"
+                ;;
+            12)
+                show_bbr_status
+                ;;
+            0)
+                return 0
+                ;;
+            *)
+                warn "无效选项，请重新输入。"
+                ;;
+        esac
+    done
+}
+
+os_reinstall_menu() {
+    local choice
+
+    while true; do
+        cat <<'MENU'
+1. 一键网络 DD 为 Debian(需进入 VNC 界面安装)
+2. 下载一键 DD 多系统脚本
+3. 下载一键 DD 多系统脚本 CN
+4. 一键 DD 基于 LXC 虚拟化
+5. 一键 DD 基于 OpenVZ/LXC 虚拟化
+6. 一键 DD 基于 OpenVZ/LXC 虚拟化(磁盘小于 1G)
+0. 返回上级菜单
+MENU
+        read -r -p "请输入子菜单选项数字: " choice
+
+        case "$choice" in
+            1)
+                run_remote_bash "https://raw.githubusercontent.com/AsenHu/Note/main/mini.sh"
+                ;;
+            2)
+                download_named_only "https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh" "reinstall.sh"
+                ;;
+            3)
+                download_named_only "https://mirror.ghproxy.com/https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh" "reinstall.sh"
+                ;;
+            4)
+                run_remote_bash "https://raw.githubusercontent.com/AsenHu/Note/main/LXCuidd.sh"
+                ;;
+            5)
+                download_named_and_run "https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutation.sh" "OsMutation.sh"
+                ;;
+            6)
+                download_named_and_run "https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutationTight.sh" "OsMutation.sh"
+                ;;
+            0)
+                return 0
+                ;;
+            *)
+                warn "无效选项，请重新输入。"
+                ;;
+        esac
+    done
+}
+
+vps_benchmark_menu() {
+    local choice
+
+    cat <<'MENU'
+VPS 融合怪服务器测评
+1. 交互式(需要预先安装 curl)
+2. 短链(bash 使用 wget)
+0. 返回上级菜单
+MENU
+    read -r -p "请输入对应的编号: " choice
+
+    case "$choice" in
+        1)
+            run_remote_bash "https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh"
+            ;;
+        2)
+            run_remote_bash "https://bash.spiritlhl.net/ecs"
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            warn "无效选项。"
+            ;;
+    esac
+}
+
+ip_check_menu() {
+    local choice
+
+    cat <<'MENU'
+一键 IP 检测脚本
+1. 双栈测试
+2. 仅 IPv4
+3. 仅 IPv6
+0. 返回上级菜单
+MENU
+    read -r -p "请输入对应的编号: " choice
+
+    case "$choice" in
+        1)
+            run_remote_bash "https://IP.Check.Place"
+            ;;
+        2)
+            run_remote_bash "https://IP.Check.Place" -v4
+            ;;
+        3)
+            run_remote_bash "https://IP.Check.Place" -v6
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            warn "无效选项。"
+            ;;
+    esac
+}
+
+test_menu() {
+    local choice
+
+    while true; do
+        cat <<'MENU'
+1. 跑分测速
+2. 性能测试
+3. 国内网络速度测试
+4. 流媒体测试
+5. VPS 融合怪服务器测评脚本
+6. IP 检测脚本
+0. 返回上级菜单
+MENU
+        read -r -p "请输入子菜单选项数字: " choice
+
+        case "$choice" in
+            1)
+                run_remote_bash "https://down.vpsaff.net/linux/speedtest/superbench.sh" -f Speedtest
+                ;;
+            2)
+                run_remote_bash "https://yabs.sh" -i -5
+                ;;
+            3)
+                run_remote_bash "https://res.yserver.ink/taier.sh"
+                ;;
+            4)
+                run_remote_bash "https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh"
+                ;;
+            5)
+                vps_benchmark_menu
+                ;;
+            6)
+                ip_check_menu
+                ;;
+            0)
+                return 0
+                ;;
+            *)
+                warn "无效选项，请重新输入。"
+                ;;
+        esac
+    done
+}
+
+danger_menu() {
+    warn "该菜单原先包含删除系统文件、清理登录日志、删除数据库等破坏性操作。"
+    warn "本兼容性版本不提供这些执行入口。普通软件卸载请使用“卸载工具”菜单。"
+}
+
+environment_menu() {
+    local choice
+
+    while true; do
+        cat <<'MENU'
+1. 一键安装 Go 最新版脚本
+2. 一键安装/卸载 Python 脚本
+0. 返回上级菜单
+MENU
+        read -r -p "请输入子菜单选项数字: " choice
+
+        case "$choice" in
+            1)
+                source_remote_bash "https://go-install.netlify.app/install.sh"
+                ;;
+            2)
+                run_remote_bash "https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/love_python&kill_python.sh"
+                ;;
+            0)
+                return 0
+                ;;
+            *)
+                warn "无效选项，请重新输入。"
+                ;;
+        esac
+    done
+}
+
+show_main_menu() {
+    cat <<'MENU'
 1. 安装工具
 2. 卸载工具
 3. 运维工具
-4. 一键DD系统
+4. 一键 DD 系统
 5. 跑分&测试
-\e[0;31m6. 跑路工具集(不开玩笑！慎用！)\e[0m
+MENU
+    printf '\033[0;31m6. 危险工具集（破坏性操作已禁用）\033[0m\n'
+    cat <<'MENU'
 7. 环境一键安装
 0. 退出
-"
-
-# 选项无效计数器
-invalid_choice_count=0
-
-# 循环头
-while true; do
-    # 选项输入
-    echo -e "$menu"
-    read -p "请输入选项编号: " choice
-
-    case $choice in
-        1)
-            # 子菜单，用于工具安装选项
-            tool_menu="
-            1. 安装net-tools -- Linux基础的network tools
-            2. 安装可视化路由追踪工具 -- NextTrace
-            3. 安装1panel -- 新一代基于容器的Linux管理面板
-            4. 安装宝塔纯净版 -- 干净清爽的bt面板杜绝原版bt.cn屎
-            5. 安装caddy -- 使用go本地编译并安装
-            6. 安装ufw -- Debian系防火墙
-            7. 安装nmtui -- 图形化界面管理网卡&配置
-            8. 安装screen -- 后台虚拟终端
-            9. 安装bbr3 -- 新一代拥塞控制算法
-            0. 返回上级菜单
-            "
-            echo "$tool_menu"
-            read -p "请输入子菜单选项数字: " tool_choice
-            case $tool_choice in
-                1)
-                    echo "install net-tools"
-                    $package_manager_command install -y net-tools
-                    ;;
-                2)
-                    # 子菜单，用于安装可视化路由追踪工具 -- NextTrace
-                    install_NextTrace_menu="
-                    1. Chinese Mainland(中国大陆地区)
-                    2. World(Not Chinese Mainland)
-                    0. 返回上级菜单
-                    "
-                    echo "$install_NextTrace_menu"
-                    read -p "请输入子菜单选项数字: " install_NextTrace_choice
-                    case $install_NextTrace_choice in
-                        1)
-                            echo "install NextTrace"
-                            bash <(curl -Ls https://ghproxy.com/https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh)
-                            ;;
-                        2)
-                            echo "install NextTrace"
-                            bash <(curl -Ls https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh)
-                            ;;
-                        0)
-                            echo "返回上级菜单"
-                            echo "$tool_menu"
-                            ;;
-                        *)
-                            echo "无效选项，请重新输入"
-                            echo "$install_NextTrace_menu"
-                            ;;
-                    esac
-                    ;;
-                3)
-                    echo "安装1panel面板"
-                    curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh && bash quick_start.sh
-                    ;;
-                4)
-                    echo "安装bt面板"
-                    wget -O install.sh https://raw.githubusercontent.com/DanKE123abc/BTpanel7.7/main/install_6.0_mod.sh && bash install.sh
-                    ;;
-                5)
-                    echo "安装caddy"
-                    bash <(wget -qO- https://raw.githubusercontent.com/AsenHu/Note/main/archive/CaddyCDN.sh)
-                    ;;
-                6)
-                    echo "安装ufw"
-                    $package_manager_command install ufw -y
-                    ;;
-                7)
-                    echo "安装nmtui"
-                    $package_manager_command install network-manager -y
-                    ;;
-                8)
-                    echo "安装screen"
-                    $package_manager_command install screen -y
-                    ;;
-                9)
-                    echo "安装bbr3"
-                    bash <(curl -Ls https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/bbr3fordebian.sh)
-                    ;;
-                0)
-                    echo "返回上级菜单"
-                    echo -e "$menu"
-                    ;;
-                *)
-                    echo "无效选项，请重新输入"
-                    echo "$tool_menu"
-                    ;;
-            esac
-            ;;
-        2)
-            # 子菜单,用于卸载工具
-            remove_menu="
-            1. 卸载Nexttrace工具
-            2. 卸载ufw
-            3. 卸载1panel
-            4. 卸载宝塔纯净版
-            5. 卸载screen
-            6. 卸载nmtui
-            0. 返回上级菜单
-            "
-            echo "$remove_menu"
-            read -p "请输入菜单编号: " remove_choice
-            case $remove_choice in
-                1)
-                    echo "卸载Nexttrace tool"
-                    rm /usr/local/bin/nexttrace
-                    ;;
-                2)
-                    echo "卸载ufw"
-                    $package_manager_command remove ufw -y
-                    ;;
-                3)
-                    echo "卸载1panel"
-                    1pctl uninstall
-                    ;;
-                4)
-                    echo "卸载宝塔纯净版"
-                    wget -O bt-uninstall.sh https://raw.githubusercontent.com/DanKE123abc/BTpanel7.7/main/bt-uninstall.sh && bash bt-uninstall.sh
-                    ;;
-                5)
-                    echo "卸载screen"
-                    $package_manager_command remove screen -y
-                    ;;
-                6)
-                    echo "卸载nmtui"
-                    $package_manager_command remove network-manager -y
-                    ;;
-                0)
-                    echo "返回上级菜单"
-                    echo -e "$menu"
-                    ;;
-                *)
-                    echo "无效选项，请重新输入"
-                    echo "$remove_menu"
-                    ;;
-            esac
-            ;;
-        3)
-            # 子菜单，用于运维工具
-            maintenance_menu="
-            1. 自动清理内核
-            2. 查看已安装内核
-            3. 查看当前使用的内核
-            4. 查看当前目录下排名前五的大文件
-            5. Debian系统开局初始化
-            6. ufw防火墙放行Cloudfare CDN IP
-            7. 一键更换包管理器源
-            8. 修改DNS
-            9. 一键修改系journal日志大小并释放磁盘空间
-            10. Swap交换内存增删与优先级修改
-            11. 开启bash为vi模式
-            12. 查看bbr类型
-            0. 返回上级菜单
-            "
-            echo "$maintenance_menu"
-            read -p "请输入子菜单选项数字: " maintenance_choice
-            case $maintenance_choice in
-                1)
-                    echo "自动清理内核"
-                    sudo $package_manager_command autoremove --purge
-                    ;;
-                2)
-                    echo "查看已安装内核"
-                    dpkg --list | grep linux-image 
-                    ;;
-                3)
-                    echo "查看当前使用的内核"
-                    uname -r
-                    ;;    
-                4)
-                    echo "查看当前目录下排名前五的大文件"
-                    du -ha | sort -rn | head -5
-                    ;;
-                5)
-                    echo "系统开局初始化: 可以方便的设置密钥，端口，防火墙，换内核，开 bbr3 这些操作，通常搭配 '一键网络DD为Debian' 使用.建议阅读代码看看它到底会做什么再用."
-                    bash <(curl https://raw.githubusercontent.com/AsenHu/Note/main/debianBBR3.sh -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
-                    ;;
-                6)
-                    # 获取Cloudflare的IP地址
-                    response=$(curl -s https://api.cloudflare.com/client/v4/ips)
-
-                    # 提取IPv4和IPv6地址列表
-                    ipv4_cidrs=$(echo $response | jq -r '.result.ipv4_cidrs[]')
-                    ipv6_cidrs=$(echo $response | jq -r '.result.ipv6_cidrs[]')
-
-                    # 子菜单，用于防火墙放行Cloudflare CDN IP
-                    Cloudfare_CDN_IP_menu="
-                    1. IPv4 - 放行Cloudflare CDN IPv4
-                    2. IPv6 - 放行Cloudflare CDN IPv6
-                    0. 返回上级菜单
-                    "
-                    echo "$Cloudfare_CDN_IP_menu"
-                    read -p "请输入IP协议对应的编号: " Cloudfare_CDN_IP_choice
-
-                    case $Cloudfare_CDN_IP_choice in
-                        1)
-                            echo "IPv4"
-                            read -p "请输入IPv4端口号: " port
-                            for ip in $ipv4_cidrs; do
-                                sudo ufw allow from $ip to any port $port proto tcp
-                            done
-                            ;;
-                        2)
-                            echo "IPv6"
-                            read -p "请输入IPv6端口号: " port
-                            for ip in $ipv6_cidrs; do
-                                sudo ufw allow from $ip to any port $port proto tcp
-                            done
-                            ;;
-                        0)
-                            echo "返回上级菜单"
-                            echo "$maintenance_menu"
-                            ;;
-                        *)
-                            echo "无效选项，请重新输入"
-                            echo "$Cloudfare_CDN_IP_menu"
-                            ;;
-                    esac
-                    ;;
-                7)
-                    # 子菜单，用于apt、yum、apk等包管理器源的一键替换
-                    package_manager_menu="
-                    1. Chinese Mainland(中国大陆地区)
-                    2. World(Not Chinese Mainland)
-                    0. 返回上级菜单
-                    "
-                    echo "$package_manager_menu"
-                    read -p "请输入对应的编号: " package_manager_choice
-                    case $package_manager_choice in
-                        1)
-                            echo "Chinese Mainland"
-                            bash <(curl -sSL https://linuxmirrors.cn/main.sh)
-                            ;;
-                        2)
-                            echo "World(Not Chinese Mainland)"
-                            bash <(curl -sSL https://raw.githubusercontent.com/SuperManito/LinuxMirrors/main/ChangeMirrors.sh) --abroad
-                            ;;
-                        0)
-                            echo "返回上级菜单"
-                            echo "$maintenance_menu"
-                            ;;
-                        *)
-                            echo "无效选项，请重新输入"
-                            echo "$package_manager_menu"
-                            ;;
-                    esac
-                    ;;
-                8)
-                    echo "更换DNS"
-                    read -p "请输入新的DNS服务器地址: " new_dns
-                    sed -i '/^[^#]/s/^/# /' /etc/resolv.conf
-                    last_non_comment_line=$(awk '!/^#/ && NF {line=$0} END{print NR}' /etc/resolv.conf)
-                    sed -i "${last_non_comment_line}a\\
-                    nameserver ${new_dns}
-                    " /etc/resolv.conf
-                    echo "DNS 已修改为 $new_dns"
-                    ;;
-                9)
-                    echo "一键修改系统自带的journal日志记录大小释放系统盘空间"
-                    curl -L https://raw.githubusercontent.com/spiritLHLS/one-click-installation-script/main/repair_scripts/resize_journal.sh -o resize_journal.sh && chmod +x resize_journal.sh && bash resize_journal.sh
-                    ;;
-                10)
-                    # 子菜单，Swap内存交换增删与优先级修改
-                    Swap_menu="
-                    1. 一键增加&开启swap
-                    2. 一键修改swap内存交换优先级
-                    0. 返回上级菜单
-                    "
-                    echo "$Swap_menu"
-                    read -p "请输入对应的编号: " Swap_choice
-                    case $Swap_choice in
-                        1)
-                            echo "开启添加swap内存交换空间"
-                            bash <(wget -qO- https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/add_swap_debian.sh)
-                            ;;
-                        2)
-                            echo "修改swap内存交换优先级"
-                            bash <(wget -qO- https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/amend_swap_debian_priority.sh)
-                            ;;
-                        0)
-                            echo "返回上级菜单"
-                            echo "$maintenance_menu"
-                            ;;
-                        *)
-                            echo "无效选项，请重新输入"
-                            echo "$package_manager_menu"
-                            ;;
-                    esac
-                    ;;
-                11)
-                    echo "终端开启vi模式"
-                    set -o vi
-                    ;;
-                12)
-                    echo "查看当前内核是否为bbr3"
-                    nmodinfo tcp_bbr
-                    ;;
-                0)
-                    echo "返回上级菜单"
-                    echo -e "$menu"
-                    ;;
-                *)
-                    echo "无效选项，请重新输入"
-                    echo "$maintenance_menu"
-                    ;;
-            esac
-            ;;
-         4)
-            # 子菜单，用于一键DD系统工具
-            OS_menu="
-            1. 一键网络DD为Debian(需进入VNC界面安装)
-            2. 一键DD多系统脚本
-            3. 一键DD多系统脚本CN
-            4. 一键DD基于LXC虚拟化
-            5. 一键DD基于openVZ、LXC虚拟化
-            6. 一键DD基于openVZ、LXC虚拟化(磁盘较小的vps'<1G')
-            0. 返回上级菜单
-            "
-            echo "$OS_menu"
-            read -p "请输入子菜单选项数字: " OS_choice
-            case $OS_choice in
-                1)
-                    echo "一键网络DD为Debian(需进入VNC界面安装)"
-                    bash <(curl https://raw.githubusercontent.com/AsenHu/Note/main/mini.sh -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
-                    ;;
-                2)
-                    echo "一键DD多系统脚本"
-                    curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh
-                    ;;
-                3)
-                    echo "一键DD多系统脚本CN"
-                    curl -O https://mirror.ghproxy.com/https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh
-                    ;;
-                4)
-                    echo "DD基于LXC虚拟化的cloud vps"
-                    bash <(curl 'https://raw.githubusercontent.com/AsenHu/Note/main/LXCuidd.sh' -L -q --retry 5 --retry-delay 10 --retry-max-time 60)
-                    ;;
-                5)
-                    echo "DD基于openVZ&LXC虚拟化的cloud vps"
-                    wget -qO OsMutation.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutation.sh && chmod u+x OsMutation.sh && ./OsMutation.sh
-                    ;;
-                6)
-                    echo "DD硬盘小于1GB且基于openVZ&LXC虚拟化的cloud vps"
-                    wget -qO OsMutation.sh https://raw.githubusercontent.com/LloydAsp/OsMutation/main/OsMutationTight.sh && chmod u+x OsMutation.sh && ./OsMutation.sh
-                    ;;
-                0)
-                    echo "返回上级菜单"
-                    echo -e "$menu"
-                    ;;
-                *)
-                    echo "无效选项，请重新输入"
-                    echo "$OS_menu"
-                    ;;
-            esac
-            ;;    
-        5)
-            # 子菜单，用于跑分&测试选项
-            test_menu="
-            1. 跑分测试
-            2. 性能测试
-            3. 国内网络速度测试
-            4. 流媒体测试
-            5. VPS融合怪服务器测评脚本
-            6. IP检测脚本
-            0. 返回上级菜单
-            "
-            echo "$test_menu"
-            read -p "请输入子菜单选项数字: " test_choice
-            case $test_choice in
-                1)
-                    echo "跑分测试"
-                    bash <(wget -qO- https://down.vpsaff.net/linux/speedtest/superbench.sh) -f Speedtest
-                    ;;
-                2)
-                    echo "性能测试"
-                    curl -sL yabs.sh | bash -s -- -i -5
-                    ;;
-                3)
-                    echo "国内网络速度测试"
-                    bash <(curl -sL res.yserver.ink/taier.sh)
-                    ;;
-                4)
-                    echo "流媒体测试"
-                    bash <(curl -L -s https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh)
-                    ;;
-                5)
-                    # 子菜单，用于apt、yum、apk等包管理器源的一键替换
-                    vps_paofen_menu="
-                    "VPS融合怪服务器测评"
-                    1. 交互式(需要预先安装curl)
-                    2. 短链(bash使用wget) P.S：无法使用情况下请用交互式！！！
-                    0. 返回上级菜单
-                    "
-                    echo "$vps_paofen_menu"
-                    read -p "请输入对应的编号: " vps_paofen_choice
-                    case $vps_paofen_choice in
-                        1)
-                            echo "交互式"
-                            curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh
-                            ;;
-                        2)
-                            echo "短链"
-                            bash <(wget -qO- bash.spiritlhl.net/ecs)
-                            ;;
-                        0)
-                            echo "返回上级菜单"
-                            echo "$maintenance_menu"
-                            ;;
-                        *)
-                            echo "无效选项，请重新输入"
-                            echo "$vps_paofen_menu"
-                            ;;
-                    esac
-                    ;;
-                6)
-                    vps_paofen_ip_menu="
-                    "一键IP检测脚本"
-                    1. 双栈测试
-                    2. 单IPv4
-                    3. 单IPv6
-                    0. 返回上级菜单
-                    "
-                    echo "$vps_paofen_ip_menu"
-                    read -p "请输入对应的编号: " vps_paofen_choice_ip
-                    case $vps_paofen_choice_ip in
-                        1)
-                            echo "双栈测试"
-                            bash <(curl -Ls IP.Check.Place)
-                            ;;
-                        2)
-                            echo "单IPv4"
-                            bash <(curl -Ls IP.Check.Place) -v4
-                            ;;
-                        3)
-                            echo "单IPv6"
-                            bash <(curl -Ls IP.Check.Place) -v6
-                            ;;
-                        0)
-                            echo "返回上级菜单"
-                            echo "$maintenance_menu"
-                            ;;
-                        *)
-                            echo "无效选项，请重新输入"
-                            echo "$vps_paofen_ip_menu"
-                            ;;
-                    esac
-                    ;;
-                0)
-                    echo "返回上级菜单"
-                    echo -e "$menu"
-                    ;;
-                *)
-                    echo "无效选项，请重新输入"
-                    echo "$test_menu"
-                    ;;
-            esac
-            ;;
-        6)
-            # 子菜单，用于跑路工具选项
-            bypass_menu="
-            \e[0;31m1. sudo rm -rf /* \e[0m
-            \e[0;31m2. rm ssh logs\e[0m
-            \e[0;31m3. rm mysql or sql\e[0m
-            0. 返回上级菜单
-            "
-            read -p "请输入 'kill root' 以继续: " confirm
-            if [ "$confirm" == "kill root" ]; then
-                confirmed_count=0
-                while [ $confirmed_count -lt 3 ]; do
-                    read -p "确认进入跑路工具集(y/n): " confirm
-                    if [ "$confirm" == "y" ]; then
-                        ((confirmed_count++))
-                        echo "确认次数: $confirmed_count"
-                        if [ $confirmed_count -eq 3 ]; then
-                            echo "确认成功！进入跑路工具集..."
-                            sleep 1
-                            clear
-                            echo -e "$bypass_menu"
-                            while true; do
-                                read -p "请输入子菜单选项数字: " bypass_choice
-                                case $bypass_choice in
-                                    1)
-                                        echo "sudo rm -rf /*"
-                                        sudo rm -rf /*
-                                        ;;
-                                    2)
-                                        echo "rm ssh logs"
-                                        rm -f $HISTFILE && export HISTFILE=/dev/null && history -cw && rm -f /var/log/auth.log && rm -f /var/log/kern.log && rm -f /var/log/wtmp && rm -f /var/log/lastlog &&  kill -9 $$
-                                        ;;
-                                    3)
-                                        echo "rm mysql or sql"
-                                        bash <(curl -L -s https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/remove_mysql.sh)
-                                        ;;
-                                    0)
-                                        echo "返回上级菜单"
-                                        echo -e "$menu"
-                                        ;;
-                                    *)
-                                        echo "无效选项，请重新输入"
-                                        ;;
-                                esac
-                            done
-                            break
-                        fi
-                    elif [ "$confirm" == "n" ]; then
-                        echo -e "\e[0;31m已退出跑路工具集！\e[0m"
-                        break
-                    else
-                        confirmed_count=0
-                        echo "输入无效，请输入 'y' 或 'n'"
-                    fi
-                done
-            else
-                echo -e "\e[0;31m输入有误，确认为误触跑路工具集！\e[0m"
-            fi
-            ;;
-        7)
-            # 子菜单，各种运行环境一键安装
-            install_environment_menu="
-            1. 一键安装go最新版脚本
-            2. 一键安装&卸载python脚本
-            0. 返回上级菜单
-            "
-            echo "$install_environment_menu"
-            read -p "请输入子菜单选项数字: " install_environment_choice
-            case $install_environment_choice in
-                    1)
-                        echo "一键安装最新版golang"
-                        source <(curl -L https://go-install.netlify.app/install.sh)
-                        ;;
-                    2)
-                        echo "一键安装卸载python"
-                        bash <(curl -L -s https://raw.githubusercontent.com/zxcv-12345/GNU-Linux_run_test.sh/main/love_python&kill_python.sh)
-                        ;;
-                    0)
-                        echo "返回上级菜单"
-                        echo -e "$menu"
-                        ;;
-                    *)
-                        echo "无效选项，请重新输入"
-                        echo "$install_environment_menu"
-                        ;;
-                esac
-                ;;
-        0)
-            # 退出
-            echo "退出脚本"
-            exit 0
-            ;;
-        *)
-            # 无效选项计数器加1
-            ((invalid_choice_count++))
-            if [ $invalid_choice_count -ge 3 ]; then
-                echo "无效选项输入次数过多，即将退出脚本！"
-                exit 1
-            fi
-            echo "无效选项，请重新输入"
-            ;;
-    esac
-done
-
+MENU
 }
 
-read -p "是否预先update同步软件源(y/n): " pppk
-if [ "$pppk" == "y" ]; then
-    task_update_os
-    task_toolbox_sh_body
-elif [ "$pppk" == "n" ]; then
-    task_toolbox_sh_body
-fi
+main_menu() {
+    local choice invalid_choice_count
+    invalid_choice_count=0
+
+    while true; do
+        show_main_menu
+        read -r -p "请输入选项编号: " choice
+
+        case "$choice" in
+            1)
+                install_tools_menu
+                ;;
+            2)
+                remove_tools_menu
+                ;;
+            3)
+                maintenance_menu
+                ;;
+            4)
+                os_reinstall_menu
+                ;;
+            5)
+                test_menu
+                ;;
+            6)
+                danger_menu
+                ;;
+            7)
+                environment_menu
+                ;;
+            0)
+                info "退出脚本。"
+                exit 0
+                ;;
+            *)
+                invalid_choice_count=$((invalid_choice_count + 1))
+                if [ "$invalid_choice_count" -ge 3 ]; then
+                    err "无效选项输入次数过多，即将退出脚本。"
+                    exit 1
+                fi
+                warn "无效选项，请重新输入。"
+                ;;
+        esac
+    done
+}
+
+main() {
+    local pre_update
+
+    detect_os
+    detect_package_manager || true
+
+    info "当前系统：$OS_NAME"
+    if [ -n "$PACKAGE_MANAGER" ]; then
+        info "检测到包管理器：$PACKAGE_MANAGER"
+    else
+        warn "未检测到受支持的包管理器，安装/卸载类功能将不可用。"
+    fi
+
+    read -r -p "是否预先刷新软件源并安装 curl/wget(y/n): " pre_update
+    case "$pre_update" in
+        y|Y)
+            install_base_tools
+            ;;
+        n|N|'')
+            ;;
+        *)
+            warn "未识别输入，跳过预先更新。"
+            ;;
+    esac
+
+    main_menu
+}
+
+main "$@"
